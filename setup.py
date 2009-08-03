@@ -6,8 +6,15 @@ Run:
 to install the package from the source archive.
 """
 import sys,os, string
-from setuptools import setup
+from distutils.core import setup
 from sys import hexversion
+
+def find_version( ):
+	for line in open( '__init__.py'):
+		if line.strip().startswith( '__version__' ):
+			return eval(line.strip().split('=')[1].strip())
+	raise RuntimeError( """No __version__ = 'string' in __init__.py""" )
+version = find_version()
 
 if __name__ == "__main__":
 	if hexversion >= 0x2030000:
@@ -53,15 +60,13 @@ which TTFQuery was refactored.
 	### Now the actual set up call
 	setup (
 		name = "TTFQuery",
-		version = "1.0.1",
+		version = version,
 		description = "FontTools-based package for querying system fonts",
 		author = "Mike C. Fletcher",
 		author_email = "mcfletch@users.sourceforge.net",
 		url = "http://ttfquery.sourceforge.net/",
 		license = "BSD-style, see license.txt for details",
-		include_package_data = True,
 
-		zip_safe=True,
 		install_requires = ['FontTools'],
 		package_dir = {
 			'ttfquery':'.',

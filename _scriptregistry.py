@@ -7,7 +7,7 @@ if os.environ.has_key('HOME'):
 else:
 	# OpenGLContext uses the Application Data directory for win32,
 	# should consider porting that code here...
-    registryFile = os.path.join( os.path.split(__file__)[0], "font.cache")
+	registryFile = os.path.join( os.path.split(__file__)[0], "font.cache")
 
 # make sure we can write to the registryFile
 if not os.path.exists(registryFile):
