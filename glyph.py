@@ -24,7 +24,7 @@ class Glyph( object):
 		]
 		self.width = glyphquery.width( font, self.glyphName )
 		self.height = glyphquery.lineHeight( font )
-	
+
 	def calculateContours( self, font ):
 		"""Given a character, determine contours to draw
 
@@ -90,7 +90,7 @@ class Glyph( object):
 					list(flags[last:])+list(flags[last:])
 				) )
 		return contours
-		
+
 def decomposeOutline( contour, steps=3 ):
 	"""Decompose a single TrueType contour to a line-loop
 
@@ -100,7 +100,7 @@ def decomposeOutline( contour, steps=3 ):
 	TrueType fonts as far as I know.
 
 	The process consists of first scanning for any multi-
-	of-curve control-point runs.  For each pair of such
+	off-curve control-point runs.  For each pair of such
 	control points, we insert a new on-curve control point.
 
 	Once we have the "expanded" control point array we
