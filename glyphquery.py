@@ -29,6 +29,9 @@ def glyphName( font, char, encoding=None, warnOnFailure=1 ):
 	"""
 	glyfName = explicitGlyph( font, char, encoding )
 	if glyfName is None:
+		encoding = describe.guessEncoding( font )       #KH
+		cmap = font['cmap']                             #KH
+		table = cmap.getcmap( *encoding )               #KH
 		glyfName = table.cmap.get( -1)
 		if glyfName is None:
 			glyfName = font['glyf'].glyphOrder[0]
@@ -80,4 +83,9 @@ def charHeight( font ):
 	if descent > 0:
 		descent = - descent
 	return ascent - descent
+
+def charDescent( font ):
+	"""Determine the general descent for the font (for scaling)"""
+	return font['OS/2'].sTypoDescender
+
 

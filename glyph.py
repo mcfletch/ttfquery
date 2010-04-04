@@ -24,7 +24,7 @@ class Glyph( object):
 		]
 		self.width = glyphquery.width( font, self.glyphName )
 		self.height = glyphquery.lineHeight( font )
-
+	
 	def calculateContours( self, font ):
 		"""Given a character, determine contours to draw
 
@@ -90,7 +90,7 @@ class Glyph( object):
 					list(flags[last:])+list(flags[last:])
 				) )
 		return contours
-
+		
 def decomposeOutline( contour, steps=3 ):
 	"""Decompose a single TrueType contour to a line-loop
 
@@ -149,6 +149,11 @@ def decomposeOutline( contour, steps=3 ):
 				#result.append( expanded[1][0] )
 				del expanded[:1]
 			else:
+				if len(expanded) == 2:                          #KH
+					assert on(expanded[0]), """Expanded outline finishes off-curve""" #KH
+					result.append( expanded[1][0] )         #KH
+					del expanded[:1] 
+					break
 				assert on(expanded[2]), "Expanded outline doesn't have proper format!"
 				points = integrateQuadratic( expanded[:3], steps = steps )
 				result.extend( points )
