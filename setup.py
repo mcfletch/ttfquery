@@ -28,7 +28,7 @@ if __name__ == "__main__":
 				"""Operating System :: OS Independent""",
 				"""Topic :: Multimedia :: Graphics""",
 			],
-			'download_url': "https://sourceforge.net/project/showfiles.php?group_id=84080",
+			#'download_url': "https://sourceforge.net/project/showfiles.php?group_id=84080",
 			'keywords': 'fonttools,ttf,truetype,outline,font,curve,system fonts',
 			'long_description' : """FontTools-based package for querying system fonts
 
