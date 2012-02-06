@@ -80,6 +80,7 @@ which TTFQuery was refactored.
             os.path.join( 'bin','ttffiles' ),
             os.path.join( 'bin','ttffamily' ),
             os.path.join( 'bin','ttfgroups' ),
+            os.path.join( 'bin','ttfmetadata' ),
         ],
         **extraArguments
     )

@@ -64,23 +64,23 @@ class Registry(object):
 
         filename -- fully specified path to the font file
         force -- if false, and the metadata is already
-            available for this file, do not access the
-            font file to retrieve, just return the existing
-            metadata.
+        available for this file, do not access the
+        font file to retrieve, just return the existing
+        metadata.
 
         return value:
             tuple of:
                 filename -- fully specified absolute path
                 modifiers -- (weightInteger, italicsFlag)
                 specificName -- specific name of the particular
-                    font stored in the given file, the name of
-                    the "modified" font
+                font stored in the given file, the name of
+                the "modified" font
                 fontName -- name of the general font which
-                    the modifiers are specialising
+                the modifiers are specialising
                 specifier -- family specifier, two-tuple of
-                    high-level and sub-level font classifications
-                    based on font characteristics as encoded
-                    in the font file.
+                high-level and sub-level font classifications
+                based on font characteristics as encoded
+                in the font file.
         """
         filename = os.path.abspath( filename )
         if self.files.has_key( filename ) and not force:
@@ -229,7 +229,7 @@ class Registry(object):
 
         file -- a file open in binary write mode or a filename
         force -- if not true and DIRTY false, then don't actually
-            save anything
+        save anything
 
         returns number of records saved
         """
@@ -247,7 +247,7 @@ class Registry(object):
 
         file -- a file open in binary read mode or a filename
         clearFirst -- if true, clear tables first, and reset DIRTY
-            to 0 after finished
+        to 0 after finished
         """
         if clearFirst:
             self.clear()
@@ -270,8 +270,9 @@ class Registry(object):
             try:
                 self.register( filename, force = force )
             except Exception, err:
+                log.info( 'Failure scanning %s', filename )
                 if printErrors:
-                    log.warn( "Failure scanning %s: %s", filename, traceback.format_exc())
+                    log.warn( "%s", traceback.format_exc())
                 failed.append( filename )
             else:
                 new.append( filename )
@@ -309,10 +310,7 @@ def main():
         registry = load( testFilename )
     else:
         registry = Registry()
-    new,failed = registry.scan( directories, printErrors = 1, force = 0)
-    for f in failed:
-        exit = 1
-        log.warn( "Failed scanning: %s", f )
+    new,failed = registry.scan( directories, printErrors = False, force = 0)
     log.info( '%s fonts available', len(new) )
     registry.save(testFilename)
     return exit

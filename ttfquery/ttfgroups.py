@@ -8,18 +8,19 @@ def buildTable( filenames=None, failureCallback=None ):
     """Build table mapping {family:(font:{modifiers:(name,file)})}
 
     filenames -- if provided, list of filenames to scan,
-        otherwise the full set of system fonts provided
-        by findsystem will be used.
+    otherwise the full set of system fonts provided
+    by findsystem will be used.
     failureCallback -- if provided, a function taking three
-        arguments, the failing filename, an error-type code,
-        and the error object.  If processing should stop,
-        raise an error.
-        codes:
-            0 -- couldn't open the font file
-            1 -- couldn't find modifiers in the font file
-            2 -- couldn't find font-name in the font file
-            3 -- couldn't find the generic family specifier
-                for the font
+    arguments, the failing filename, an error-type code,
+    and the error object.  If processing should stop,
+    raise an error.
+    codes:
+    
+        0 -- couldn't open the font file
+        1 -- couldn't find modifiers in the font file
+        2 -- couldn't find font-name in the font file
+        3 -- couldn't find the generic family specifier
+        for the font
     """
     if filenames is None:
         filenames = findsystem.findFonts()

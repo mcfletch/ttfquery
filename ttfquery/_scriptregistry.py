@@ -1,5 +1,14 @@
+"""Provides primitive font registry lookup/location for scripts
+
+The singleton "registry" object (an instance of :class:`ttfquery.ttffiles.Registry`
+is the only member of note).  This registry with be created in a file 
+in the user's $HOME directory ``.font.cache`` if the $HOME environment variable 
+is defined.  Otherwise will be created in the ttfquery source code directory 
+(which is obviously not a very good solution).
+"""
 from ttfquery import ttffiles
-import os, sys
+import os, sys, logging 
+log = logging.getLogger( __name__ )
 
 ### more robust registry-file location by John Hunter...
 if os.environ.has_key('HOME'):
@@ -13,7 +22,7 @@ else:
 if not os.path.exists(registryFile):
     try: fh = file(registryFile, 'w')
     except IOError:
-        print >>sys.stderr, 'Could not open registry file %r for writing' % registryFile
+        log.error( 'Could not open registry file %r for writing', registryFile )
         raise
     else:
         fh.close()
@@ -24,9 +33,9 @@ def _getRegistry():
         registry = ttffiles.load( registryFile )
     else:
         registry = ttffiles.Registry()
-        sys.stderr.write( """Scanning for system fonts...\n""" )
+        log.info( """Scanning for system fonts...""" )
         new,failed = registry.scan( printErrors = 1, force = 0)
-        sys.stderr.write( """Scan complete. Saving to %r\n"""%(registryFile,) )
+        log.info( """Scan complete. Saving to %r\n""", registryFile,)
         registry.save(registryFile)
     return registry
 registry = _getRegistry()

@@ -202,8 +202,8 @@ def modifiers( font ):
 
     weight is taken from the OS/2 usWeightClass field
     italic is taken from either OS/2 fsSelection or
-        head macStyle, if either indicates italics we
-        report italics
+    head macStyle, if either indicates italics we
+    report italics
     """
     return (
         # weight as an integer
