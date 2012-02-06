@@ -6,11 +6,14 @@ Run:
 to install the package from the source archive.
 """
 import sys,os, string
-from distutils.core import setup
+try:
+    from setuptools import setup
+except ImportError, err:
+    from distutils.core import setup
 from sys import hexversion
 
 def find_version( ):
-    for line in open( '__init__.py'):
+    for line in open( os.path.join( 'ttfquery','__init__.py')):
         if line.strip().startswith( '__version__' ):
             return eval(line.strip().split('=')[1].strip())
     raise RuntimeError( """No __version__ = 'string' in __init__.py""" )
