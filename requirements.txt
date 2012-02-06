@@ -1,4 +1,7 @@
 # Requirements spec for pip installation
+# virtualenv --no-site-packages ttfquery-working
+# source virtualenv-working/bin/activate
+# python setup.py develop
 # pip -r requirements.txt
 http://sourceforge.net/projects/fonttools/files/2.3/fonttools-2.3.tar.gz/download
 numpy
