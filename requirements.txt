@@ -1,0 +1,4 @@
+# Requirements spec for pip installation
+# pip -r requirements.txt
+http://sourceforge.net/projects/fonttools/files/2.3/fonttools-2.3.tar.gz/download
+numpy
