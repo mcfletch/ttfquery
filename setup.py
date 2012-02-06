@@ -76,6 +76,9 @@ which TTFQuery was refactored.
         packages = [
             'ttfquery', 
         ],
+        scripts = [
+            os.path.join( 'bin','ttffiles' ),
+        ],
         **extraArguments
     )
     
