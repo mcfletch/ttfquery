@@ -2,6 +2,7 @@
 """Demo script to print ordered set of system fonts"""
 from ttfquery import describe, findsystem
 import sys, traceback, logging
+log = logging.getLogger( __name__ )
 
 def buildTable( filenames=None, failureCallback=None ):
     """Build table mapping {family:(font:{modifiers:(name,file)})}
@@ -59,11 +60,8 @@ def buildTable( filenames=None, failureCallback=None ):
 
 def interactiveCallback( file, code, err ):
     """Simple error callback for interactive use"""
-    log.error(
-        'ERR on file %r (code %s):\n', file, code,
-    )
-    log.error(
-        'Traceback: %s', traceback.format_exc( ),
+    log.warn(
+        'Failed reading file %r (code %s):\n', file, code,
     )
 
 def main():

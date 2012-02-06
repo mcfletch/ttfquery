@@ -78,6 +78,8 @@ which TTFQuery was refactored.
         ],
         scripts = [
             os.path.join( 'bin','ttffiles' ),
+            os.path.join( 'bin','ttffamily' ),
+            os.path.join( 'bin','ttfgroups' ),
         ],
         **extraArguments
     )
