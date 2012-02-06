@@ -9,7 +9,8 @@ XXX Currently two copies of exactly the same font
 """
 from ttfquery import describe, findsystem
 import cPickle, time, traceback, os, sys
-
+import logging 
+log =logging.getLogger( __name__ )
 
 FILENAME, MODIFIERS, SPECIFICNAME, FONTNAME, FAMILY = range(5)
 
@@ -270,7 +271,7 @@ class Registry(object):
                 self.register( filename, force = force )
             except Exception, err:
                 if printErrors:
-                    traceback.print_exc()
+                    log.warn( "Failure scanning %s: %s", filename, traceback.format_exc())
                 failed.append( filename )
             else:
                 new.append( filename )
@@ -286,14 +287,14 @@ def load( *arguments, **named ):
     registry.load( *arguments, **named )
     return registry
 
-
-if __name__ == "__main__":
+def main():
     usage ="""ttffiles [registryFile [directories]]
 
     Update registryFile (default "font.cache") by scanning
     the given directories, the system font directories by
     default.
     """
+    exit = 0
     import sys
     if sys.argv[1:2]:
         testFilename = sys.argv[1]
@@ -310,7 +311,11 @@ if __name__ == "__main__":
         registry = Registry()
     new,failed = registry.scan( directories, printErrors = 1, force = 0)
     for f in failed:
-        print 'FAIL', f
-    print '%s fonts available'%( len(new), )
+        exit = 1
+        log.warn( "Failed scanning: %s", f )
+    log.info( '%s fonts available', len(new) )
     registry.save(testFilename)
-    
+    return exit
+
+if __name__ == "__main__":
+    main()

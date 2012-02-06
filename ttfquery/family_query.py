@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 """Query for font-members of a particular family"""
+from ttfquery._scriptregistry import registry
+import sys, os
 
 def main():
     usage ="""ttffamily MAJOR [MINOR]
@@ -8,8 +10,6 @@ def main():
     already exist, otherwise will just use the existing
     cache.  See ttffiles.py for updating the cache.
     """
-    from ttfquery._scriptregistry import registry
-    import sys, os
     if sys.argv[1:2]:
         major = sys.argv[1]
         if sys.argv[2:3]:
