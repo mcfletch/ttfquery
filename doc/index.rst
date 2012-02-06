@@ -138,7 +138,13 @@ have multiple Font Faces (as seen below):
         Modifiers: (400, 0)
         Family Name: SERIF, ITALIAN
 
-    
+License
+-------
+
+TTFQuery is released under the simplified BSD license:
+
+.. literalinclude:: ../license.txt
+
 Library Reference
 -----------------
 
