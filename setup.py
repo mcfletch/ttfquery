@@ -8,7 +8,7 @@ to install the package from the source archive.
 import sys,os, string
 try:
     from setuptools import setup
-except ImportError, err:
+except ImportError:
     from distutils.core import setup
 from sys import hexversion
 
