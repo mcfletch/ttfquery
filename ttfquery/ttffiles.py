@@ -88,7 +88,7 @@ class Registry(object):
         font = describe.openFont(filename)
         try:
             modifiers = describe.modifiers( font )
-        except (KeyError,AttributeError), err:
+        except (KeyError,AttributeError) as err:
             modifiers = (None,None)
         specificName, fontName = describe.shortName( font )
         specifier = describe.family(font)
@@ -269,7 +269,7 @@ class Registry(object):
         for filename in findsystem.findFonts(paths):
             try:
                 self.register( filename, force = force )
-            except Exception, err:
+            except Exception as err:
                 log.info( 'Failure scanning %s', filename )
                 if printErrors:
                     log.warn( "%s", traceback.format_exc())

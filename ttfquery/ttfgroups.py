@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 """Demo script to print ordered set of system fonts"""
+from __future__ import print_function
 from ttfquery import describe, findsystem
-import sys, traceback, logging
+import sys, logging
 log = logging.getLogger( __name__ )
 
 def buildTable( filenames=None, failureCallback=None ):
@@ -28,19 +29,19 @@ def buildTable( filenames=None, failureCallback=None ):
     for filename in filenames:
         try:
             font = describe.openFont(filename)
-        except Exception, err:
+        except Exception as err:
             if failureCallback:
                 failureCallback( filename, 0, err )
         else:
             try:
                 modifiers = describe.modifiers( font )
-            except (KeyError,AttributeError), err:
+            except (KeyError,AttributeError) as err:
                 if failureCallback:
                     failureCallback( filename, 1, err )
                 modifiers = (None,None)
             try:
                 specificName, fontName = describe.shortName( font )
-            except (KeyError,AttributeError), err:
+            except (KeyError,AttributeError) as err:
                 if failureCallback:
                     failureCallback( filename, 2, err )
             else:
@@ -78,15 +79,15 @@ def main():
     keys = table.keys()
     keys.sort()
     for fam in keys:
-        print '_________________________'
-        print fam
+        print('_________________________')
+        print(fam)
         fnts = table[fam].items()
         fnts.sort()
         for fnt,modset in fnts:
             mods = modset.keys()
             mods.sort()
             mods = ",".join([ '%s%s'%( w, ['','(I)'][i&1]) for (w,i) in mods])
-            print '    ',fnt.ljust(32), '--', mods
+            print('    ',fnt.ljust(32), '--', mods)
     log.info( 'Scan took %s seconds CPU time', t )
 
 if __name__ == "__main__":

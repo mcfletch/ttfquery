@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 """Query for font-members of a particular family"""
+from __future__ import print_function
 from ttfquery._scriptregistry import registry
-import sys, os,logging
+import sys, logging
 log = logging.getLogger( __name__ )
 
 def main():
@@ -21,9 +22,9 @@ def main():
         log.error( "Need a font-family name" )
         return 1
     for fontName in registry.familyMembers( major, minor ):
-        print 'F', fontName
+        print('F', fontName)
         for specific in registry.fontMembers( fontName ):
-            print ' ', registry.fontFile( specific )
+            print(' ', registry.fontFile( specific ))
     return 0
 
 if __name__ == "__main__":

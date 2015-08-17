@@ -1,14 +1,15 @@
 #!/usr/bin/env python
 """Query for meta-data for a given font"""
-from ttfquery import describe
+from __future__ import print_function
+#from ttfquery import describe
 from ttfquery._scriptregistry import registry
-import sys, os
+import sys
 
 def printMetaData( metadata ):
-    print '    Specific Name:', metadata[2]
-    print '    File:', metadata[0]
-    print '    Modifiers:', metadata[1]
-    print '    Family Name:', ", ".join(metadata[4])
+    print('    Specific Name:', metadata[2])
+    print('    File:', metadata[0])
+    print('    Modifiers:', metadata[1])
+    print('    Family Name:', ", ".join(metadata[4]))
 
 def main():
     usage ="""metadata_query name
@@ -25,7 +26,7 @@ def main():
     fontNames = registry.matchName( name )
     fontNames.sort()
     for general in fontNames:
-        print 'Font:', general
+        print('Font:', general)
         specifics = registry.fontMembers( general )
         specifics.sort()
         for specific in specifics:

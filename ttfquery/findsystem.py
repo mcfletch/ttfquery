@@ -1,4 +1,5 @@
 """Find system fonts (only works on Linux and Win32 at the moment)"""
+from __future__ import print_function
 import sys, os, glob, re
 
 def win32FontDirectory( ):
@@ -34,7 +35,7 @@ def win32InstalledFonts( fontDirectory = None ):
                 _winreg.HKEY_LOCAL_MACHINE,
                 keyName
             )
-        except OSError, err:
+        except OSError as err:
             pass
     if not k:
         # couldn't open either WinNT or Win98 key???
@@ -132,5 +133,5 @@ def findFonts(paths = None):
     return files.keys()
 
 if __name__ == "__main__":
-    print 'linux font directories', linuxFontDirectories()
-    print 'font names', findFonts()
+    print('linux font directories', linuxFontDirectories())
+    print('font names', findFonts())
