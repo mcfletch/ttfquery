@@ -8,7 +8,11 @@ XXX Currently two copies of exactly the same font
     because of this, but it's not ideal.
 """
 from ttfquery import describe, findsystem
-import cPickle, time, traceback, os, sys
+import traceback, os
+try:
+    import cPickle as pickle 
+except ImportError:
+    import pickle
 import logging 
 log =logging.getLogger( __name__ )
 
@@ -83,12 +87,12 @@ class Registry(object):
                 in the font file.
         """
         filename = os.path.abspath( filename )
-        if self.files.has_key( filename ) and not force:
+        if filename in self.files and not force:
             return self.specificFonts.get( self.files[filename] )
         font = describe.openFont(filename)
         try:
             modifiers = describe.modifiers( font )
-        except (KeyError,AttributeError) as err:
+        except (KeyError,AttributeError):
             modifiers = (None,None)
         specificName, fontName = describe.shortName( font )
         specifier = describe.family(font)
@@ -118,7 +122,7 @@ class Registry(object):
             have the meta-data for the file loaded.
         """
         filename = os.path.abspath( filename )
-        if self.files.has_key( filename ) and not force:
+        if filename in self.files and not force:
             return self.specificFonts.get( self.files[filename] )
         self.dirty(1)
         if modifiers == None:
@@ -132,7 +136,7 @@ class Registry(object):
             self.specificFonts[ specificName ] = description
             self.shortFiles.setdefault(os.path.basename(filename), []).append( filename )
         except Exception:
-            if self.files.has_key(filename):
+            if filename in self.files:
                 del self.files[filename]
             raise
         return description
@@ -156,7 +160,7 @@ class Registry(object):
         returns list of specific font names
         """
         table = self.fonts.get( fontName, {})
-        items = table.items()
+        items = list(table.items())
         items.sort()
         if weight is not None:
             weight = describe.weightNumber( weight )
@@ -182,19 +186,19 @@ class Registry(object):
     def matchName( self, name, single=0 ):
         """Try to find a general font based on a name"""
         result = {}
-        if self.fonts.has_key( name ):
+        if name in self.fonts:
             v = name
             if single:
                 return v
             else:
                 result[v] = 1
-        if self.specificFonts.has_key( name ):
+        if name in self.specificFonts:
             v = self.specificFonts[name][FONTNAME]
             if single:
                 return v
             else:
                 result[v] = 1
-        if self.families.has_key( name.upper() ):
+        if name.upper() in self.families:
             for general in self.familyMembers( name ):
                 if single:
                     return general
@@ -240,7 +244,7 @@ class Registry(object):
             raise TypeError( """Attempted to save %r to default file, no default file specified"""% (self,))
         if not hasattr( file, 'write'):
             file = open( file, 'wb' )
-        cPickle.dump( self.specificFonts.values(), file, 1 )
+        pickle.dump( self.specificFonts.values(), file, 1 )
         return len(self.specificFonts)
     def load( self, file, clearFirst=1 ):
         """Attempt to load the font metadata from a pickled file
@@ -254,7 +258,7 @@ class Registry(object):
         if not hasattr( file, 'read'):
             self.filename = file
             file = open( file, 'rb' )
-        table = cPickle.load( file )
+        table = pickle.load( file )
         for filename, modifiers, specificName, fontName, familySpecifier in table:
             ## Minimal sanity check...
             if os.path.isfile( filename ):
@@ -269,7 +273,7 @@ class Registry(object):
         for filename in findsystem.findFonts(paths):
             try:
                 self.register( filename, force = force )
-            except Exception as err:
+            except Exception:
                 log.info( 'Failure scanning %s', filename )
                 if printErrors:
                     log.warn( "%s", traceback.format_exc())

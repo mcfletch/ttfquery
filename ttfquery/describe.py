@@ -2,13 +2,18 @@
 from fontTools import ttLib
 import sys
 try:
+    unicode,long
+except NameError:
+    unicode = str
+    long = int
+try:
     from OpenGLContext.debug.logs import text_log
 except ImportError:
     text_log = None
 
 def openFont( filename ):
     """Get a new font object"""
-    if isinstance( filename, (str,unicode)):
+    if isinstance( filename, (bytes,unicode)):
         filename = open( filename, 'rb')
     return ttLib.TTFont(filename)
 
@@ -149,7 +154,7 @@ for key,value in WEIGHT_NAMES.items():
 
 def weightNumber( name ):
     """Convert a string-name to a weight number compatible with this module"""
-    if isinstance( name, (str,unicode)):
+    if isinstance( name, (bytes,unicode)):
         name = name.lower()
         name = name.replace( '-','').replace(' ','')
         if name and name[-1] == '+':
@@ -167,7 +172,7 @@ def weightNumber( name ):
 def weightName( number ):
     """Convert integer number to a human-readable weight-name"""
     number = int(number) or 400
-    if WEIGHT_NUMBERS.has_key( number ):
+    if number in WEIGHT_NUMBERS:
         return WEIGHT_NUMBERS[number]
     name = 'thin-'
     for x in range(100,1000, 100):

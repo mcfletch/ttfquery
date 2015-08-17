@@ -1,5 +1,9 @@
 """Find system fonts (only works on Linux and Win32 at the moment)"""
 from __future__ import print_function
+try:
+    unicode
+except NameError:
+    unicode = str
 import sys, os, glob, re
 
 def win32FontDirectory( ):
@@ -125,7 +129,7 @@ def findFonts(paths = None):
                 files[f] = 1
         else:
             paths = linuxFontDirectories()
-    elif isinstance( paths, (str, unicode)):
+    elif isinstance( paths, (bytes, unicode)):
         paths = [paths]
     for path in paths:
         for file in glob.glob( os.path.join(path, '*.ttf')):

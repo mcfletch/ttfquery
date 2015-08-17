@@ -7,11 +7,11 @@ is defined.  Otherwise will be created in the ttfquery source code directory
 (which is obviously not a very good solution).
 """
 from ttfquery import ttffiles
-import os, sys, logging 
+import os, logging 
 log = logging.getLogger( __name__ )
 
 ### more robust registry-file location by John Hunter...
-if os.environ.has_key('HOME'):
+if 'HOME' in os.environ:
     registryFile = os.path.join( os.environ['HOME'], ".font.cache")
 else:
     # OpenGLContext uses the Application Data directory for win32,
@@ -20,7 +20,7 @@ else:
 
 # make sure we can write to the registryFile
 if not os.path.exists(registryFile):
-    try: fh = file(registryFile, 'w')
+    try: fh = open(registryFile, 'wb')
     except IOError:
         log.error( 'Could not open registry file %r for writing', registryFile )
         raise
