@@ -9,10 +9,10 @@ ttfquery Package
     :undoc-members:
     :show-inheritance:
 
-:mod:`_scriptregistry` Module
+:mod:`scriptregistry` Module
 -----------------------------
 
-.. automodule:: ttfquery._scriptregistry
+.. automodule:: ttfquery.scriptregistry
     :members:
     :undoc-members:
     :show-inheritance:
@@ -49,14 +49,6 @@ ttfquery Package
     :undoc-members:
     :show-inheritance:
 
-:mod:`guessdescription` Module
-------------------------------
-
-.. automodule:: ttfquery.guessdescription
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
 :mod:`ttfmetadata` Module
 ----------------------------
 
@@ -85,6 +77,22 @@ ttfquery Package
 -----------------------
 
 .. automodule:: ttfquery.ttfgroups
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+:mod:`_scriptregistry` Module
+-----------------------------
+
+.. automodule:: ttfquery._scriptregistry
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+:mod:`guessdescription` Module
+------------------------------
+
+.. automodule:: ttfquery.guessdescription
     :members:
     :undoc-members:
     :show-inheritance:

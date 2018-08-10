@@ -1,33 +1,16 @@
-"""Provides primitive font registry lookup/location for scripts
-
-The singleton "registry" object (an instance of :class:`ttfquery.ttffiles.Registry`
+"""The singleton "registry" object (an instance of :class:`ttfquery.ttffiles.Registry`
 is the only member of note).  This registry with be created in a file 
 in the user's $HOME directory ``.font.cache`` if the $HOME environment variable 
 is defined.  Otherwise will be created in the ttfquery source code directory 
 (which is obviously not a very good solution).
+
+.. note::
+
+    This module is basically here for legacy applications that used
+    the singleton registry instance. Use scriptregistry.get_registry()
+    in new code.
 """
-from ttfquery import ttffiles
-import os, logging 
-log = logging.getLogger( __name__ )
+from ttfquery import scriptregistry
 
-### more robust registry-file location by John Hunter...
-if 'HOME' in os.environ:
-    registryFile = os.path.join( os.environ['HOME'], ".font.cache")
-else:
-    # OpenGLContext uses the Application Data directory for win32,
-    # should consider porting that code here...
-    registryFile = os.path.join( os.path.split(__file__)[0], "font.cache")
-
-def get_registry():
-    global registry
-    if os.path.isfile( registryFile ):
-        registry = ttffiles.load( registryFile )
-    else:
-        registry = ttffiles.Registry()
-        log.info( """Scanning for system fonts...""" )
-        new,failed = registry.scan( printErrors = 1, force = 0)
-        log.info( """Scan complete. Saving to %r\n""", registryFile,)
-        registry.save(registryFile)
-    return registry
-
-_getRegistry = get_registry
+_getRegistry = scriptregistry.get_registry
+registry = scriptregistry.get_registry()

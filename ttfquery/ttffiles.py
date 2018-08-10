@@ -1,12 +1,4 @@
-
-"""Registry of available TrueType font files
-
-XXX Currently two copies of exactly the same font
-    will likely confuse the registry because the
-    specificFonts set will only have one of the
-    metrics sets.  Nothing breaks at the moment
-    because of this, but it's not ideal.
-"""
+"""Registry of available TrueType font files"""
 from ttfquery import describe, findsystem
 import traceback, os
 try:
@@ -21,7 +13,7 @@ import logging
 log =logging.getLogger( __name__ )
 from collections import namedtuple
 
-FontMetadata = namedtuple(
+class FontMetadata(namedtuple(
     'FontMetadata',
     (
         'file_name',
@@ -30,7 +22,31 @@ FontMetadata = namedtuple(
         'font_name',
         'family',
     ),
-)
+)):
+    """Stores specific font metadata
+
+    A specific font is basically an actual font-file,
+    that is, it is one of a family of fonts which make 
+    up the various "modified" versions of a font face.
+
+    So `Ubuntu Light Italic` would be a specific font 
+    that is a part of the font-face `Ubuntu` with the modifers
+    for `Light` and `Italic` applied.
+
+    * file_name -- fully specified absolute path
+    * modifiers -- (weightInteger, italicsFlag)
+    * specific_name -- specific name of the particular
+        font stored in the given file, the name of
+        the "modified" font
+    * font_name -- name of the general font which
+        the modifiers are specialising
+    * family -- family specifier, two-tuple of
+        high-level and sub-level font classifications
+        based on font characteristics as encoded
+        in the font file.
+    """
+    __slots__ = ()
+
 
 FILENAME, MODIFIERS, SPECIFICNAME, FONTNAME, FAMILY = range(5)
 
@@ -38,6 +54,7 @@ class Registry(object):
     """Object providing centralized registration of TTF files
 
     Attributes:
+
         families -- mapping from TrueType font families
             to sub-families and then to general fonts
             (as a set of font-names).
@@ -45,11 +62,12 @@ class Registry(object):
             specific font instances
         specificFonts -- mapping from specific font names
             to the entire "metrics" set for the particular
-            font (a FontMetadata namedtuples)
+            font (a :class:`FontMetadata` namedtuple)
         files -- mapping from (absolute) filenames to
             specific font names
         shortFiles -- mapping from font filename basenames
             to font-file-lists
+        
         DIRTY -- flag indicating whether the registry has
             had a new font registered (i.e. whether it should
             be saved out to disk).
@@ -82,25 +100,13 @@ class Registry(object):
     ):
         """Retrieve metadata from font file
 
-        filename -- fully specified path to the font file
-        force -- if false, and the metadata is already
-        available for this file, do not access the
-        font file to retrieve, just return the existing
-        metadata.
+        :param filename: fully specified path to the font file
+        :param force: if false, and the metadata is already
+            available for this file, do not access the
+            font file to retrieve, just return the existing
+            metadata.
 
-        return value:
-            tuple of:
-                filename -- fully specified absolute path
-                modifiers -- (weightInteger, italicsFlag)
-                specificName -- specific name of the particular
-                font stored in the given file, the name of
-                the "modified" font
-                fontName -- name of the general font which
-                the modifiers are specialising
-                specifier -- family specifier, two-tuple of
-                high-level and sub-level font classifications
-                based on font characteristics as encoded
-                in the font file.
+        :rtype: :class:`FontMetadata`
         """
         filename = os.path.abspath( filename )
         if filename in self.files and not force:
@@ -119,7 +125,7 @@ class Registry(object):
             fontName,
             specifier,
         )
-        return tuple([
+        return FontMetadata(*[
             (x.decode('utf-8') if isinstance(x,bytes) else x)
             for x in result 
         ])
@@ -162,7 +168,13 @@ class Registry(object):
         return description
 
     def familyMembers( self, major, minor=None ):
-        """Get all (general) fonts for a given family"""
+        """Get all (general) fonts for a given family
+
+        :param major: string description of major family
+        :param minor: optional string description of minor family
+        
+        :rtype: list of font faces in the family
+        """
         major = major.upper()
         if not minor:
             result = []
@@ -174,10 +186,11 @@ class Registry(object):
     def fontMembers( self, fontName, weight=None, italics=None ):
         """Get specific font names for given generic font name
 
-        weight -- if specified, only members with the given weight
-        italics -- if specified, only members where the flag matches
+        :param fontName: general font name to search
+        :param weight: if given, only return specific fonts with that weight
+        :param italics: if given, only return fonts with italics value equal
 
-        returns list of specific font names
+        :rtype: list of specific font names
         """
         table = self.fonts.get( fontName, {})
         items = list(table.items())
@@ -192,11 +205,19 @@ class Registry(object):
             result.extend( item[1])
         return result
     def fontForms( self, fontName ):
-        """Retrieve the set of font-forms (weight,italics) available in a font"""
+        """Retrieve the set of font-forms (weight,italics) available in a font
+        
+        :param fontName: general font name to search
+        :rtype: list of two-tuples of (weight,italics) available in the font
+        """
         return list(self.fonts.get( fontName, {}).keys())
 
     def fontFile( self, specificName ):
-        """Return the absolute path-name for a given specific font"""
+        """Return the absolute path-name for a given specific font
+        
+        :param specificName: specific font name to search
+        :rtype: str(file_name) of the FontMetadata instance
+        """
         description = self.specificFonts.get( specificName )
         if description:
             return description[0]
@@ -204,7 +225,14 @@ class Registry(object):
             raise KeyError( """Couldn't find font with specificName %r, can't retrieve filename for it"""%( specificName,))
 
     def matchName( self, name, single=0 ):
-        """Try to find a general font based on a name"""
+        """Try to find a general font based on a name
+        
+        :param name: name to use to try to find the font, can match on any of
+            specific name, major family, or minor family
+        :param single: return the first match only (not a dictionary of results)
+
+        :rtype: if single str(fontName) else {fontName:1,...}
+        """
         if isinstance(name,bytes):
             try:
                 name = name.decode('utf-8')
@@ -320,13 +348,14 @@ def load( *arguments, **named ):
     return registry
 
 def get_options():
+    """Creation base options for creating a ttfquery registry"""
     import argparse
-    from ttfquery import _scriptregistry
+    from ttfquery import scriptregistry
     parser = argparse.ArgumentParser(description="Create or update font metadata cache")
     parser.add_argument(
         '-r','--registry',
-        help="The registry file to update, defaults to %s"%(_scriptregistry.registryFile),
-        default=_scriptregistry.registryFile,
+        help="The registry file to update, defaults to %s"%(scriptregistry.registryFile),
+        default=scriptregistry.registryFile,
     )
     parser.add_argument(
         '-s','--scan',
@@ -350,6 +379,7 @@ def main():
     return 0
 
 def registry_for_options(options):
+    """Given options as in :func:`get_options` initialize registry"""
     if options.registry and os.path.exists(options.registry):
         registry = load(options.registry)
         new = False
