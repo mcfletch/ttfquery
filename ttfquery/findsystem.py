@@ -24,7 +24,12 @@ def win32FontDirectory( ):
             _winreg.CloseKey( k )
 
 def win32InstalledFonts( fontDirectory = None ):
-    """Get list of explicitly *installed* font names"""
+    """Get list of explicitly *installed* font names
+    
+    IFF there is no registry entry for installed fonts,
+    likely due to a too-new windows install, then we'll
+    just return all .ttf files in fontDirectory
+    """
     import _winreg
     if fontDirectory is None:
         fontDirectory = win32FontDirectory()
@@ -98,15 +103,11 @@ def linuxFontDirectories( ):
         ]
         
         set = []
-        def add( arg, directory, files):
-            set.append( directory )
         for directory in directories:
             directory = directory = os.path.expanduser( os.path.expandvars(directory))
-            try:
-                if os.path.isdir( directory ):
-                    os.path.walk(directory, add, ())
-            except (IOError, OSError, TypeError, ValueError):
-                pass
+            for (dirname,_,_) in os.walk(directory):
+                if os.path.exists(dirname) and dirname not in set:
+                    set.append(dirname)
         return set
 
 def findFonts(paths = None):
@@ -134,7 +135,7 @@ def findFonts(paths = None):
     for path in paths:
         for file in glob.glob( os.path.join(path, '*.ttf')):
             files[os.path.abspath(file)] = 1
-    return files.keys()
+    return list(files.keys())
 
 if __name__ == "__main__":
     print('linux font directories', linuxFontDirectories())

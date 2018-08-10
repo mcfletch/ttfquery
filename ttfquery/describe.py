@@ -25,12 +25,12 @@ def shortName( font ):
     family = ""
     for record in font['name'].names:
         if record.nameID == FONT_SPECIFIER_NAME_ID and not name:
-            if '\000' in record.string:
+            if b'\000' in record.string:
                 name = unicode(record.string, 'utf-16-be').encode('utf-8')
             else:
                 name = record.string
         elif record.nameID == FONT_SPECIFIER_FAMILY_ID and not family:
-            if '\000' in record.string:
+            if b'\000' in record.string:
                 family = unicode(record.string, 'utf-16-be').encode('utf-8')
             else:
                 family = record.string

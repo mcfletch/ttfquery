@@ -6,3 +6,9 @@ MANIFEST
 *.cache
 *.~?~
 doc/_build
+build
+__pycache__
+.coverage
+.tox
+.pytest_cache
+*.pyc

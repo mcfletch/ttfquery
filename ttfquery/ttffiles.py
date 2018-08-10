@@ -13,8 +13,24 @@ try:
     import cPickle as pickle 
 except ImportError:
     import pickle
+try:
+    unicode 
+except NameError:
+    unicode = str
 import logging 
 log =logging.getLogger( __name__ )
+from collections import namedtuple
+
+FontMetadata = namedtuple(
+    'FontMetadata',
+    (
+        'file_name',
+        'modifiers',
+        'specific_name',
+        'font_name',
+        'family',
+    ),
+)
 
 FILENAME, MODIFIERS, SPECIFICNAME, FONTNAME, FAMILY = range(5)
 
@@ -29,7 +45,7 @@ class Registry(object):
             specific font instances
         specificFonts -- mapping from specific font names
             to the entire "metrics" set for the particular
-            font.
+            font (a FontMetadata namedtuples)
         files -- mapping from (absolute) filenames to
             specific font names
         shortFiles -- mapping from font filename basenames
@@ -96,13 +112,17 @@ class Registry(object):
             modifiers = (None,None)
         specificName, fontName = describe.shortName( font )
         specifier = describe.family(font)
-        return (
+        result = (
             filename,
             modifiers,
             specificName,
             fontName,
             specifier,
         )
+        return tuple([
+            (x.decode('utf-8') if isinstance(x,bytes) else x)
+            for x in result 
+        ])
     def register(
         self,
         filename,
@@ -127,7 +147,7 @@ class Registry(object):
         self.dirty(1)
         if modifiers == None:
             (filename, modifiers, specificName, fontName, familySpecifier) = self.metadata(filename, force = force)
-        description = (filename, modifiers, specificName, fontName, familySpecifier)
+        description = FontMetadata(filename, modifiers, specificName, fontName, familySpecifier)
         try:
             self.files[filename] = specificName
             major,minor = familySpecifier
@@ -150,7 +170,7 @@ class Registry(object):
                 result.extend( set.keys())
             return result
         minor = minor.upper()
-        return self.families.get( major, {}).get(minor,{}).keys()
+        return list(self.families.get( major, {}).get(minor,{}).keys())
     def fontMembers( self, fontName, weight=None, italics=None ):
         """Get specific font names for given generic font name
 
@@ -173,7 +193,7 @@ class Registry(object):
         return result
     def fontForms( self, fontName ):
         """Retrieve the set of font-forms (weight,italics) available in a font"""
-        return self.fonts.get( fontName, {}).keys()
+        return list(self.fonts.get( fontName, {}).keys())
 
     def fontFile( self, specificName ):
         """Return the absolute path-name for a given specific font"""
@@ -185,6 +205,12 @@ class Registry(object):
 
     def matchName( self, name, single=0 ):
         """Try to find a general font based on a name"""
+        if isinstance(name,bytes):
+            try:
+                name = name.decode('utf-8')
+            except Exception:
+                # suppose we should use something else here...
+                name = name.decode('latin-1')
         result = {}
         if name in self.fonts:
             v = name
@@ -226,9 +252,9 @@ class Registry(object):
                             result[item] = 1
         if not result:
             raise KeyError( """Couldn't find a font with name %r"""%(name,))
-        return result.keys()
+        return list(result.keys())
 
-    def save( self, file= None, force=0 ):
+    def save( self, file=None, force=0 ):
         """Attempt to save the font metadata to a pickled file
 
         file -- a file open in binary write mode or a filename
@@ -244,7 +270,8 @@ class Registry(object):
             raise TypeError( """Attempted to save %r to default file, no default file specified"""% (self,))
         if not hasattr( file, 'write'):
             file = open( file, 'wb' )
-        pickle.dump( self.specificFonts.values(), file, 1 )
+        pickle.dump( list(self.specificFonts.values()), file, 1 )
+        self.dirty(0)
         return len(self.specificFonts)
     def load( self, file, clearFirst=1 ):
         """Attempt to load the font metadata from a pickled file
@@ -292,32 +319,60 @@ def load( *arguments, **named ):
     registry.load( *arguments, **named )
     return registry
 
-def main():
-    usage ="""ttffiles [registryFile [directories]]
+def get_options():
+    import argparse
+    from ttfquery import _scriptregistry
+    parser = argparse.ArgumentParser(description="Create or update font metadata cache")
+    parser.add_argument(
+        '-r','--registry',
+        help="The registry file to update, defaults to %s"%(_scriptregistry.registryFile),
+        default=_scriptregistry.registryFile,
+    )
+    parser.add_argument(
+        '-s','--scan',
+        help='If specified, then force a scan even if the registry already exists (otherwise only scan if new)',
+        default=False,
+        action='store_true',
+    )
+    parser.add_argument(
+        '--directories',
+        nargs='*',
+        help='Directory (directories) to scan for font metadata, default is system font directories',
+    )
+    return parser
 
-    Update registryFile (default "font.cache") by scanning
-    the given directories, the system font directories by
-    default.
-    """
-    exit = 0
-    import sys
-    if sys.argv[1:2]:
-        testFilename = sys.argv[1]
-        if sys.argv[2:]:
-            directories = sys.argv[2:]
-        else:
-            directories = None
-    else:
-        testFilename = "font.cache"
-        directories = None
-    if os.path.isfile( testFilename ):
-        registry = load( testFilename )
+
+def main():
+    import logging 
+    logging.basicConfig(level=logging.INFO)
+    options = get_options().parse_args()
+    registry = registry_for_options(options)
+    return 0
+
+def registry_for_options(options):
+    if options.registry and os.path.exists(options.registry):
+        registry = load(options.registry)
+        new = False
     else:
         registry = Registry()
-    new,failed = registry.scan( directories, printErrors = False, force = 0)
-    log.info( '%s fonts available', len(new) )
-    registry.save(testFilename)
-    return exit
+        new = True
+    scan = new 
+    if getattr(options,'scan',False):
+        log.info("Forcing rescan of directories")
+        scan = True
+    if scan:
+        new,failed = registry.scan( 
+            options.directories or None, 
+            printErrors = False, 
+            force = 1
+        )
+        if options.registry and registry.DIRTY:
+            registry.save(options.registry)
+    else:
+        log.info("Registry already populated")
+    log.info( '%s fonts available', len(registry.fonts) )
+    return registry
+
 
 if __name__ == "__main__":
     main()

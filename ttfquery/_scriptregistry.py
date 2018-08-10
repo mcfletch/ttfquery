@@ -18,17 +18,8 @@ else:
     # should consider porting that code here...
     registryFile = os.path.join( os.path.split(__file__)[0], "font.cache")
 
-# make sure we can write to the registryFile
-if not os.path.exists(registryFile):
-    try: fh = open(registryFile, 'wb')
-    except IOError:
-        log.error( 'Could not open registry file %r for writing', registryFile )
-        raise
-    else:
-        fh.close()
-        os.remove(registryFile)
-
-def _getRegistry():
+def get_registry():
+    global registry
     if os.path.isfile( registryFile ):
         registry = ttffiles.load( registryFile )
     else:
@@ -38,4 +29,5 @@ def _getRegistry():
         log.info( """Scan complete. Saving to %r\n""", registryFile,)
         registry.save(registryFile)
     return registry
-registry = _getRegistry()
+
+_getRegistry = get_registry
