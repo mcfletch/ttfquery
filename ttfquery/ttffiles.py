@@ -112,6 +112,15 @@ class Registry(object):
         if filename in self.files and not force:
             return self.specificFonts.get( self.files[filename] )
         font = describe.openFont(filename)
+        if 'glyf' not in font:
+            # CFF / OpenType-CFF fonts have no 'glyf' table; ttfquery's glyph
+            # outline extraction is TrueType-only, so exclude them rather than
+            # crash later when their outlines are requested.
+            raise ValueError(
+                "Unsupported font (no 'glyf' table, likely CFF/OpenType): %s" % (
+                    filename,
+                )
+            )
         try:
             modifiers = describe.modifiers( font )
         except (KeyError,AttributeError):
