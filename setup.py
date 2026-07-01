@@ -36,7 +36,6 @@ if __name__ == "__main__":
         ],
 	install_requires = ['fonttools','numpy'],
         classifiers= [
-            """License :: OSI Approved :: BSD License""",
             """Programming Language :: Python""",
             """Topic :: Software Development :: Libraries :: Python Modules""",
             """Intended Audience :: Developers""",

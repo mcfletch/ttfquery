@@ -1,0 +1,55 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "TTFQuery"
+dynamic = ["version"]
+description = "FontTools-based package for querying system fonts"
+readme = "README.md"
+license = { file = "license.txt" }
+authors = [
+    { name = "Mike C. Fletcher", email = "mcfletch@users.sourceforge.net" },
+]
+requires-python = ">=3.7"
+dependencies = [
+    "fonttools",
+    "numpy",
+]
+keywords = [
+    "fonttools",
+    "ttf",
+    "truetype",
+    "outline",
+    "font",
+    "curve",
+    "system fonts",
+]
+classifiers = [
+    "Programming Language :: Python",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Intended Audience :: Developers",
+    "Operating System :: OS Independent",
+    "Topic :: Multimedia :: Graphics",
+]
+
+[project.urls]
+Homepage = "http://ttfquery.sourceforge.net/"
+
+[project.optional-dependencies]
+test = [
+    "pytest",
+    "pytest-cov",
+]
+
+[project.scripts]
+ttffiles = "ttfquery.ttffiles:main"
+ttffamily = "ttfquery.ttffamily:main"
+ttfgroups = "ttfquery.ttfgroups:main"
+ttfmetadata = "ttfquery.ttfmetadata:main"
+
+[tool.setuptools]
+packages = ["ttfquery"]
+
+[tool.setuptools.dynamic]
+version = { attr = "ttfquery.__version__" }
