@@ -1,7 +1,7 @@
 from __future__ import print_function
 from ttfquery import findsystem
 import pytest
-import sys, glob, unittest
+import os, sys, glob, unittest
 pytestmark = pytest.mark.skipif(not sys.platform == 'win32', reason='Win32 tests')
 
 class TestWin32(unittest.TestCase):
