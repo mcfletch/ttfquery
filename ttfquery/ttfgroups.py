@@ -1,7 +1,7 @@
 """Demo script to print ordered set of system fonts"""
 from __future__ import print_function
-from ttfquery import describe, ttffiles
-import sys, logging
+from ttfquery import ttffiles
+import logging
 log = logging.getLogger( __name__ )
 
 def buildTable( registry ):
@@ -13,7 +13,7 @@ def buildTable( registry ):
     """
     table = {}
     for major, minors in registry.families.items():
-        for minor, fonts in minors.items():
+        for _minor, fonts in minors.items():
             for fontname in fonts.keys():
                 table.setdefault(major,{}).setdefault(fontname, {})
                 font = registry.fonts.get(fontname)

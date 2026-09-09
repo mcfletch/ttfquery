@@ -1,7 +1,9 @@
 from __future__ import print_function
 from ttfquery import ttffiles, describe, glyphquery, glyph
-import pytest
-import os, sys, glob, unittest, tempfile, shutil
+import os
+import unittest
+import tempfile
+import shutil
 
 class TestGlyphQuery(unittest.TestCase):
     def setUp(self):
@@ -17,15 +19,15 @@ class TestGlyphQuery(unittest.TestCase):
 
     def test_has_a_glyph(self):
         has,total = 0,0
-        for name,metadata in self.registry.specificFonts.items():
+        for _name,metadata in self.registry.specificFonts.items():
             font = describe.openFont(metadata.file_name)
-            height = glyphquery.charHeight(font)
-            line = glyphquery.lineHeight(font)
-            desc = glyphquery.charDescent(font)
+            glyphquery.charHeight(font)
+            glyphquery.lineHeight(font)
+            glyphquery.charDescent(font)
             if glyphquery.hasGlyph(font,'a'):
                 glyphName = glyphquery.explicitGlyph(font,'a')
                 if glyphName:
-                    width = glyphquery.width(font,glyphName)
+                    glyphquery.width(font,glyphName)
                     has += 1
 
                     shape = glyph.Glyph(glyphName)
@@ -38,7 +40,7 @@ class TestGlyphQuery(unittest.TestCase):
             else:
                 glyphName = glyphquery.glyphName(font,'a')
                 assert glyphName, """Didn't get a placeholder for the 'a' character"""
-                width = glyphquery.width(font,glyphName)
+                glyphquery.width(font,glyphName)
             total += 1
         assert total, "No specific fonts on this system?"
         assert has/float(total) > .2, "More than 4/5 of fonts on this system are missing a glyph for `a`? %s/%s"%(has,total)

@@ -1,7 +1,9 @@
 from __future__ import print_function
 from ttfquery import ttffiles, ttfgroups, ttfmetadata, ttffamily
-import pytest
-import os, sys, glob, unittest, tempfile, shutil
+import os
+import unittest
+import tempfile
+import shutil
 
 class TestRegistry(unittest.TestCase):
     def setUp(self):
@@ -30,10 +32,10 @@ class TestRegistry(unittest.TestCase):
             except KeyError:
                 pass
             if font:
-                break 
+                break
         if not font:
             raise RuntimeError("Unable to find any of Arial/Helvetica/SANS")
-        
+
     def test_ttfgroups(self):
         registry = self.registry
         table = ttfgroups.buildTable(registry)
@@ -56,4 +58,3 @@ class TestRegistry(unittest.TestCase):
             ttffamily.search(registry,family)
             for subfam in subfams.keys():
                 ttffamily.search(registry,family,subfam)
-        

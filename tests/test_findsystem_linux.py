@@ -1,9 +1,10 @@
 from __future__ import print_function
 from ttfquery import findsystem
 import pytest
-import sys, glob, unittest
+import sys
+import unittest
 pytestmark = pytest.mark.skipif(
-    not sys.platform.startswith('linux'), 
+    not sys.platform.startswith('linux'),
     reason='Linux tests'
 )
 
@@ -15,4 +16,3 @@ class TestLinux(unittest.TestCase):
     def test_fonts_from_registry(self):
         fonts = findsystem.findFonts()
         assert fonts, "No fonts were found in our default font-search paths"
-    

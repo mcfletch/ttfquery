@@ -1,7 +1,7 @@
 """The singleton "registry" object (an instance of :class:`ttfquery.ttffiles.Registry`
-is the only member of note).  This registry with be created in a file 
-in the user's $HOME directory ``.font.cache`` if the $HOME environment variable 
-is defined.  Otherwise will be created in the ttfquery source code directory 
+is the only member of note).  This registry with be created in a file
+in the user's $HOME directory ``.font.cache`` if the $HOME environment variable
+is defined.  Otherwise will be created in the ttfquery source code directory
 (which is obviously not a very good solution).
 
 .. note::

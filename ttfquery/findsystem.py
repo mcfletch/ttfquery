@@ -1,10 +1,11 @@
 """Find system fonts (only works on Linux and Win32 at the moment)"""
 from __future__ import print_function
-try:
-    unicode
-except NameError:
-    unicode = str
-import sys, os, glob, re
+import sys
+import os
+import glob
+import re
+
+unicode = str
 
 def win32FontDirectory( ):
     """Get User-specific font directory on Win32"""
@@ -25,7 +26,7 @@ def win32FontDirectory( ):
 
 def win32InstalledFonts( fontDirectory = None ):
     """Get list of explicitly *installed* font names
-    
+
     IFF there is no registry entry for installed fonts,
     likely due to a too-new windows install, then we'll
     just return all .ttf files in fontDirectory
@@ -63,11 +64,11 @@ def win32InstalledFonts( fontDirectory = None ):
         return list(items.keys())
     finally:
         winreg.CloseKey( k )
-    
+
 
 def linuxFontDirectories( ):
     """Get system font directories on Linux/Unix
-    
+
     Uses /usr/sbin/chkfontpath to get the list
     of system-font directories, note that many
     of these will *not* be truetype font directories.
@@ -103,7 +104,7 @@ def linuxFontDirectories( ):
             "/System/Library/Fonts/",
             "System Folder:Fonts:",
         ]
-        
+
         set = []
         for directory in directories:
             directory = directory = os.path.expanduser( os.path.expandvars(directory))

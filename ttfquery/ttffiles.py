@@ -1,17 +1,16 @@
 """Registry of available TrueType font files"""
 from ttfquery import describe, findsystem
-import traceback, os
+import traceback
+import os
 try:
-    import cPickle as pickle 
+    import cPickle as pickle
 except ImportError:
     import pickle
-try:
-    unicode 
-except NameError:
-    unicode = str
-import logging 
-log =logging.getLogger( __name__ )
+import logging
 from collections import namedtuple
+
+unicode = str
+log = logging.getLogger( __name__ )
 
 class FontMetadata(namedtuple(
     'FontMetadata',
@@ -26,10 +25,10 @@ class FontMetadata(namedtuple(
     """Stores specific font metadata
 
     A specific font is basically an actual font-file,
-    that is, it is one of a family of fonts which make 
+    that is, it is one of a family of fonts which make
     up the various "modified" versions of a font face.
 
-    So `Ubuntu Light Italic` would be a specific font 
+    So `Ubuntu Light Italic` would be a specific font
     that is a part of the font-face `Ubuntu` with the modifers
     for `Light` and `Italic` applied.
 
@@ -67,7 +66,7 @@ class Registry(object):
             specific font names
         shortFiles -- mapping from font filename basenames
             to font-file-lists
-        
+
         DIRTY -- flag indicating whether the registry has
             had a new font registered (i.e. whether it should
             be saved out to disk).
@@ -136,7 +135,7 @@ class Registry(object):
         )
         return FontMetadata(*[
             (x.decode('utf-8') if isinstance(x,bytes) else x)
-            for x in result 
+            for x in result
         ])
     def register(
         self,
@@ -160,7 +159,7 @@ class Registry(object):
         if filename in self.files and not force:
             return self.specificFonts.get( self.files[filename] )
         self.dirty(1)
-        if modifiers == None:
+        if modifiers is None:
             (filename, modifiers, specificName, fontName, familySpecifier) = self.metadata(filename, force = force)
         description = FontMetadata(filename, modifiers, specificName, fontName, familySpecifier)
         try:
@@ -181,13 +180,13 @@ class Registry(object):
 
         :param major: string description of major family
         :param minor: optional string description of minor family
-        
+
         :rtype: list of font faces in the family
         """
         major = major.upper()
         if not minor:
             result = []
-            for key,set in self.families.get(major,{}).items():
+            for _key,set in self.families.get(major,{}).items():
                 result.extend( set.keys())
             return result
         minor = minor.upper()
@@ -215,7 +214,7 @@ class Registry(object):
         return result
     def fontForms( self, fontName ):
         """Retrieve the set of font-forms (weight,italics) available in a font
-        
+
         :param fontName: general font name to search
         :rtype: list of two-tuples of (weight,italics) available in the font
         """
@@ -223,7 +222,7 @@ class Registry(object):
 
     def fontFile( self, specificName ):
         """Return the absolute path-name for a given specific font
-        
+
         :param specificName: specific font name to search
         :rtype: str(file_name) of the FontMetadata instance
         """
@@ -235,7 +234,7 @@ class Registry(object):
 
     def matchName( self, name, single=0 ):
         """Try to find a general font based on a name
-        
+
         :param name: name to use to try to find the font, can match on any of
             specific name, major family, or minor family
         :param single: return the first match only (not a dictionary of results)
@@ -381,10 +380,10 @@ def get_options():
 
 
 def main():
-    import logging 
+    import logging
     logging.basicConfig(level=logging.INFO)
     options = get_options().parse_args()
-    registry = registry_for_options(options)
+    registry_for_options(options)
     return 0
 
 def registry_for_options(options):
@@ -395,14 +394,14 @@ def registry_for_options(options):
     else:
         registry = Registry()
         new = True
-    scan = new 
+    scan = new
     if getattr(options,'scan',False):
         log.info("Forcing rescan of directories")
         scan = True
     if scan:
-        new,failed = registry.scan( 
-            options.directories or None, 
-            printErrors = False, 
+        new,failed = registry.scan(
+            options.directories or None,
+            printErrors = False,
             force = 1
         )
         if options.registry and registry.DIRTY:

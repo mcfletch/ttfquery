@@ -3,7 +3,7 @@
 from __future__ import print_function
 #from ttfquery import describe
 from ttfquery import ttffiles
-import sys, logging
+import logging
 
 def printMetaData( metadata ):
     print('    Specific Name:', metadata.specific_name)
@@ -35,7 +35,7 @@ def find_match(name, registry):
         specifics.sort()
         for specific in specifics:
             printMetaData( registry.metadata( registry.fontFile(specific) ))
-    
-    
+
+
 if __name__ == "__main__":
     main()

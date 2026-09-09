@@ -54,10 +54,10 @@ def width( font, glyphName ):
     """
     try:
         return font['hmtx'].metrics[ glyphName ][0]
-    except KeyError:
+    except KeyError as err:
         raise ValueError( """Couldn't find glyph for glyphName %r"""%(
             glyphName,
-        ))
+        )) from err
 
 def lineHeight( font ):
     """Get the base-line to base-line height for the font

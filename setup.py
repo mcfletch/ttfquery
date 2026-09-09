@@ -5,7 +5,7 @@ Run:
     python setup.py install
 to install the package from the source archive.
 """
-import sys, os, string
+import os
 from setuptools import setup
 HERE = os.path.dirname(__file__)
 
@@ -32,9 +32,9 @@ if __name__ == "__main__":
             'ttfquery':'ttfquery',
         },
         packages = [
-            'ttfquery', 
+            'ttfquery',
         ],
-	install_requires = ['fonttools','numpy'],
+    install_requires = ['fonttools','numpy'],
         classifiers= [
             """Programming Language :: Python""",
             """Topic :: Software Development :: Libraries :: Python Modules""",
@@ -74,4 +74,4 @@ which TTFQuery was refactored.
             ]
         }
     )
-    
+

@@ -2,11 +2,8 @@
 from fontTools import ttLib
 import sys
 
-try:
-    unicode, long
-except NameError:
-    unicode = str
-    long = int
+unicode = str
+long = int
 try:
     from OpenGLContext.debug.logs import text_log
 except ImportError:

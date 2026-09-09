@@ -48,7 +48,7 @@ WEIGHT_SYNONYMS = [
 WEIGHT_MODIFIERS = [
     'extra', 'ultra'
 ]
-    
+
 
 ITALIC_INDICATORS = [
     'italic', 'ital','itali', 'it', 'bolditalic',
@@ -130,6 +130,6 @@ def get( name, style=None ):
             if key[0] == style[0]:
                 return value
         # well, there's at least one font here, use it...
-        for key, value in set.items():
+        for _key, value in set.items():
             return value
     return None

@@ -1,7 +1,6 @@
 from __future__ import print_function
 from ttfquery import describe, findsystem
-import pytest
-import sys, glob, unittest
+import unittest
 
 class TestDescribe(unittest.TestCase):
     def test_describe_system_fonts(self):
@@ -10,7 +9,7 @@ class TestDescribe(unittest.TestCase):
                 font = describe.openFont(fontfile)
             except Exception as err:
                 err.args += ('Error opening font', font)
-                raise 
+                raise
             else:
                 short = describe.shortName( font )
                 assert short, "Null name for font %s"%(fontfile,)

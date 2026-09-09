@@ -2,7 +2,7 @@
 """Query for font-members of a particular family"""
 from __future__ import print_function
 from ttfquery import ttffiles
-import sys, logging
+import logging
 log = logging.getLogger( __name__ )
 
 def get_options():

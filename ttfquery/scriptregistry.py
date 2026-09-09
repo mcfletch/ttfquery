@@ -1,13 +1,14 @@
 """Provides a single font metadata cache from which multiple programs can run
 
-Note: on systems without an XDG_CACHE_HOME or a HOME environment variable 
+Note: on systems without an XDG_CACHE_HOME or a HOME environment variable
 this will store the cache in the *code* directory for ttfquery, which is
 obviously sub-optimal.
 
 `registryFile` -- calculated at load time as the location for the cache
 """
 from ttfquery import ttffiles
-import os, logging 
+import os
+import logging
 log = logging.getLogger( __name__ )
 
 ### more robust registry-file location by John Hunter...
