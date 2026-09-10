@@ -73,3 +73,21 @@ dummy-variable-rgx = "^(_[a-zA-Z0-9_]*|err)$"
 ignore = [
     'E501', # long lines, kept readable by hand
 ]
+
+# The package's own declarations, checked as a consumer's checker reads them.
+# `check_untyped_defs` rather than `disallow_untyped_defs`: this package is
+# older than annotations, and its bodies being checked is the half that finds
+# defects -- the other half is a job of its own, tracked as one.
+[tool.mypy]
+python_version = "3.12"
+check_untyped_defs = true
+warn_unused_ignores = true
+ignore_missing_imports = true
+
+# `findsystem` reads the Windows font directories out of the registry, and
+# `winreg` is a module Linux does not have. Checked as Windows sees it in a
+# second run -- see tools/preflight.toml -- so this keeps the Linux run from
+# reporting nine absent names as defects.
+[[tool.mypy.overrides]]
+module = "ttfquery.findsystem"
+disable_error_code = ["attr-defined"]

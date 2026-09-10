@@ -1,13 +1,13 @@
 """Extract meta-data from a font-file to describe the font"""
-from fontTools import ttLib
+import logging
 import sys
+from typing import Dict, List
+
+from fontTools import ttLib
 
 unicode = str
 long = int
-try:
-    from OpenGLContext.debug.logs import text_log
-except ImportError:
-    text_log = None
+log = logging.getLogger(__name__)
 
 
 def openFont(filename):
@@ -21,21 +21,33 @@ FONT_SPECIFIER_NAME_ID = 4
 FONT_SPECIFIER_FAMILY_ID = 1
 
 
+def _recordText(value):
+    """A name record as text, whichever way the font stored it.
+
+    A record is bytes in one of two encodings and the font does not say which:
+    UTF-16BE where it carries the NUL bytes of one, and a single-byte encoding
+    otherwise -- Latin-1, which is what the Macintosh Roman a name table names
+    agrees with for the characters a font name uses.
+    """
+    if not isinstance(value, bytes):
+        return value
+    return (value.decode("utf-16-be") if b"\000" in value
+            else value.decode("latin-1"))
+
+
 def shortName(font):
-    """Get the short name from the font's names table"""
+    """The font's own name and its family's, as text
+
+    ``('Open Sans Bold Italic', 'Open Sans')`` -- what the font calls itself,
+    and the family it belongs to.
+    """
     name = ""
     family = ""
     for record in font["name"].names:
         if record.nameID == FONT_SPECIFIER_NAME_ID and not name:
-            if b"\000" in record.string:
-                name = unicode(record.string, "utf-16-be").encode("utf-8")
-            else:
-                name = record.string
+            name = _recordText(record.string)
         elif record.nameID == FONT_SPECIFIER_FAMILY_ID and not family:
-            if b"\000" in record.string:
-                family = unicode(record.string, "utf-16-be").encode("utf-8")
-            else:
-                family = record.string
+            family = _recordText(record.string)
         if name and family:
             break
     return name, family
@@ -180,7 +192,9 @@ WEIGHT_NAMES = {
     "black": 900,
     "heavy": 900,
 }
-WEIGHT_NUMBERS = {}
+#: Every name for each weight, so a number reads back as the words a font
+#: might have used for it.
+WEIGHT_NUMBERS: Dict[int, List[str]] = {}
 for key, value in WEIGHT_NAMES.items():
     WEIGHT_NUMBERS.setdefault(value, []).append(key)
 
@@ -228,8 +242,7 @@ def familyNames(familyID, subFamilyID=0):
     """Convert family integers to human-readable names"""
     familyName, subFamilies = FAMILY_NAMES.get(familyID, ("RESERVED", None))
     if familyName == "RESERVED":
-        if text_log:
-            text_log.warn("Font has invalid (reserved) familyID: %s", familyID)
+        log.warning("Font has invalid (reserved) familyID: %s", familyID)
     if subFamilies:
         subFamily = subFamilies.get(subFamilyID, "RESERVED")
     else:
@@ -276,11 +289,7 @@ def guessEncoding(font, given=None):
     """
     if isinstance(given, tuple) and given:
         if len(given) == 2:
-            if __debug__:
-                if text_log:
-                    text_log.info(
-                        """Checking for explicitly required encoding %r""", given
-                    )
+            log.debug("Checking for explicitly required encoding %r", given)
             if not font["cmap"].getcmap(*given):
                 raise ValueError(
                     """The specified font encoding %r does not appear to be available within the font %r. Available encodings: %s"""

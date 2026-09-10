@@ -1,9 +1,9 @@
 """Glyph-specific queries on font-files"""
+import logging
+
 from ttfquery import describe
-try:
-    from OpenGLContext.debug.logs import text_log
-except ImportError:
-    text_log = None
+
+log = logging.getLogger(__name__)
 
 def hasGlyph( font, char, encoding=None ):
     """Check to see if font appears to have explicit glyph for char"""
@@ -35,8 +35,8 @@ def glyphName( font, char, encoding=None, warnOnFailure=1 ):
         glyfName = table.cmap.get( -1)
         if glyfName is None:
             glyfName = font['glyf'].glyphOrder[0]
-            if text_log and warnOnFailure:
-                text_log.warn(
+            if warnOnFailure:
+                log.warning(
                     """Unable to find glyph name for %r, in %r using first glyph in table (%r)""",
                     char,
                     describe.shortName(font),

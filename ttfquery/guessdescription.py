@@ -16,6 +16,7 @@ XXX This is English-specific and entirely dependent on the
     there will be a considerable number of cases where the
     resulting name and flags will be incorrect.
 """
+from typing import Any, Dict
 WEIGHTS = [
     'demibold', 'extrabold', 'semibold', 'ultrabold', 'bold',
     'ultralight', 'extralight', 'light',
@@ -53,7 +54,8 @@ WEIGHT_MODIFIERS = [
 ITALIC_INDICATORS = [
     'italic', 'ital','itali', 'it', 'bolditalic',
 ]
-SYSTEM_FONTS = {}
+#: The fonts a scan of the system found, by the name it was asked for.
+SYSTEM_FONTS: Dict[str, Any] = {}
 
 def interpretModifiers( name ):
     """Heuristic attempt to get weight and italic data from font-name

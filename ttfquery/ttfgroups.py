@@ -1,5 +1,7 @@
 """Demo script to print ordered set of system fonts"""
 from __future__ import print_function
+
+from typing import Any, Dict
 from ttfquery import ttffiles
 import logging
 log = logging.getLogger( __name__ )
@@ -11,7 +13,8 @@ def buildTable( registry ):
     otherwise the full set of system fonts provided
     by findsystem will be used.
     """
-    table = {}
+    #: family -> font name -> modifier set -> (font name, file name)
+    table: Dict[Any, Dict[Any, Dict[Any, Any]]] = {}
     for major, minors in registry.families.items():
         for _minor, fonts in minors.items():
             for fontname in fonts.keys():
@@ -46,5 +49,5 @@ def run_report(table):
         fnts = sorted( table[fam].items() )
         for fnt,modset in fnts:
             mods = sorted(modset.keys())
-            mods = ",".join([ '%s%s'%( w, ['','(I)'][i&1]) for (w,i) in mods])
-            print('    ',fnt.ljust(32), '--', mods)
+            shown = ",".join([ '%s%s'%( w, ['','(I)'][i&1]) for (w,i) in mods])
+            print('    ',fnt.ljust(32), '--', shown)

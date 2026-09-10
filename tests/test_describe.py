@@ -17,3 +17,40 @@ class TestDescribe(unittest.TestCase):
                 assert len(family)==2, family
                 modifiers = describe.modifiers( font )
                 assert describe.weightName(modifiers[0])
+
+
+class TestTheNameIsText:
+    """`shortName` answers what the font calls itself, as text.
+
+    A name record is bytes in one of two encodings, and answering those bytes
+    put `b'Open Sans'` into every message that named a font and left the font
+    registry decoding what this had just encoded.
+    """
+
+    def a_font(self):
+        from ttfquery import findsystem
+        for path in findsystem.findFonts():
+            try:
+                return describe.openFont(path)
+            except Exception:
+                continue
+        return None
+
+    def test_both_halves_are_strings(self):
+        font = self.a_font()
+        if font is None:
+            import pytest
+            pytest.skip('no readable font on this machine')
+        name, family = describe.shortName(font)
+        assert isinstance(name, str), repr(name)
+        assert isinstance(family, str), repr(family)
+
+    def test_a_two_byte_record_is_read_as_utf_16(self):
+        assert describe._recordText('Ångstrom'.encode('utf-16-be')) == \
+            'Ångstrom'
+
+    def test_a_single_byte_record_is_read_as_latin_1(self):
+        assert describe._recordText(b'Open Sans') == 'Open Sans'
+
+    def test_text_is_left_as_it_is(self):
+        assert describe._recordText('Open Sans') == 'Open Sans'
