@@ -11,7 +11,7 @@ license = { file = "license.txt" }
 authors = [
     { name = "Mike C. Fletcher", email = "mcfletch@users.sourceforge.net" },
 ]
-requires-python = ">=3.7"
+requires-python = ">=3.9"
 dependencies = [
     "fonttools",
     "numpy",
@@ -26,7 +26,13 @@ keywords = [
     "system fonts",
 ]
 classifiers = [
-    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
     "Topic :: Software Development :: Libraries :: Python Modules",
     "Intended Audience :: Developers",
     "Operating System :: OS Independent",
@@ -79,6 +85,9 @@ ignore = [
 # older than annotations, and its bodies being checked is the half that finds
 # defects -- the other half is a job of its own, tracked as one.
 [tool.mypy]
+# Named here so that `mypy` with no arguments checks the package: the tox
+# environment and a developer's bare `mypy` are then the same run.
+files = ["ttfquery"]
 python_version = "3.12"
 check_untyped_defs = true
 warn_unused_ignores = true
