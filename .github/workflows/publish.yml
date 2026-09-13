@@ -1,9 +1,16 @@
 name: Test & Publish
 
-# Runs tests on every push and pull request. On pushes to master the package is
+# Runs tests on every push and pull request. On pushes to `main` the package is
 # built and published to PyPI via PyPI's Trusted Publisher (OIDC) mechanism.
-# skip-existing means an unchanged version is silently skipped, so a push that
-# does not bump ttfquery.__version__ will not fail the workflow.
+#
+# Every job that `publish` needs has to name the same branch it does. `build`
+# named `master` while `publish` named `main`, so a push to `main` skipped the
+# build, and a skipped dependency skips the dependent: nothing was uploaded and
+# the run was green, which is the worst way for a release not to happen.
+#
+# What decides whether there is anything to upload is the `version` job below,
+# which asks PyPI. `skip-existing` on the upload is the net under that rather
+# than the mechanism.
 on:
   push:
     branches: [main, develop]
@@ -40,7 +47,7 @@ jobs:
 
   build:
     needs: test
-    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
