@@ -1,2 +1,2 @@
 """Fonttools package for querying and sorting system fonts"""
-__version__ = "2.0.1a1"
+__version__ = "2.1.0"
