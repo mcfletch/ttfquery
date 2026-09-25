@@ -86,8 +86,9 @@ select = [
     "ARG", "DTZ",
     # exec, tar extraction without a filter, and URL opening of any scheme.
     "S102", "S202", "S310",
-    # `X | Y` for unions where the floor allows it.
-    "UP007",
+    # `X | Y` for unions where the floor allows it, and the builtin generics
+    # (`dict[str, int]`) rather than their `typing` aliases.
+    "UP007", "UP006", "UP035",
 ]
 # `_name` as well as `_`: an underscore prefix is how Python says a name is
 # bound but deliberately unused.

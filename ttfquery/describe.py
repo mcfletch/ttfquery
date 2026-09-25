@@ -1,7 +1,6 @@
 """Extract meta-data from a font-file to describe the font"""
 import logging
 import sys
-from typing import Dict, List
 
 from fontTools import ttLib
 
@@ -194,7 +193,7 @@ WEIGHT_NAMES = {
 }
 #: Every name for each weight, so a number reads back as the words a font
 #: might have used for it.
-WEIGHT_NUMBERS: Dict[int, List[str]] = {}
+WEIGHT_NUMBERS: dict[int, list[str]] = {}
 for key, value in WEIGHT_NAMES.items():
     WEIGHT_NUMBERS.setdefault(value, []).append(key)
 
