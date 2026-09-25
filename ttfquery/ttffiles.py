@@ -1,11 +1,8 @@
 """Registry of available TrueType font files"""
 from ttfquery import describe, findsystem
-import traceback
+import argparse
 import os
-try:
-    import cPickle as pickle
-except ImportError:
-    import pickle
+import pickle
 import logging
 from collections import namedtuple
 
@@ -244,8 +241,7 @@ class Registry(object):
         if isinstance(name,bytes):
             try:
                 name = name.decode('utf-8')
-            except Exception:
-                # suppose we should use something else here...
+            except UnicodeDecodeError:
                 name = name.decode('latin-1')
         result = {}
         if name in self.fonts:
@@ -321,7 +317,7 @@ class Registry(object):
         if not hasattr( file, 'read'):
             self.filename = file
             file = open( file, 'rb' )
-        table = pickle.load( file )
+        table = pickle.load( file )  # noqa: S301 the registry's own cache, written by `save`
         for filename, modifiers, specificName, fontName, familySpecifier in table:
             ## Minimal sanity check...
             if os.path.isfile( filename ):
@@ -331,15 +327,24 @@ class Registry(object):
         return len(table)
 
     def scan( self, paths=None, printErrors=0, force = 0 ):
-        """Scan the given paths registering each found font"""
+        """Scan the given paths registering each found font
+
+        Returns ``(new, failed)``, the file names registered and the file
+        names that could not be read. Each failure is logged: at INFO with
+        the error's message, or with ``printErrors`` at WARNING with its
+        traceback.
+        """
         new, failed = [],[]
         for filename in findsystem.findFonts(paths):
             try:
                 self.register( filename, force = force )
-            except Exception:
-                log.info( 'Failure scanning %s', filename )
+            except Exception as err:
+                # A malformed font raises whatever fontTools meets first, and
+                # the file is reported in `failed` whichever it is.
                 if printErrors:
-                    log.warn( "%s", traceback.format_exc())
+                    log.warning( 'Failure scanning %s', filename, exc_info=True )
+                else:
+                    log.info( 'Failure scanning %s: %s', filename, err )
                 failed.append( filename )
             else:
                 new.append( filename )
@@ -357,8 +362,7 @@ def load( *arguments, **named ):
 
 def get_options():
     """Creation base options for creating a ttfquery registry"""
-    import argparse
-    from ttfquery import scriptregistry
+    from ttfquery import scriptregistry  # noqa: PLC0415 scriptregistry imports this module
     parser = argparse.ArgumentParser(description="Create or update font metadata cache")
     parser.add_argument(
         '-r','--registry',
@@ -380,7 +384,6 @@ def get_options():
 
 
 def main():
-    import logging
     logging.basicConfig(level=logging.INFO)
     options = get_options().parse_args()
     registry_for_options(options)

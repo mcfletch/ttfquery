@@ -11,6 +11,7 @@
 # All configuration values have a default; values that are commented out
 # serve to show the default.
 
+import ast
 import os
 import sphinx_readable_theme
 
@@ -56,7 +57,7 @@ version = release = None
 def find_version( ):
     for line in open( os.path.join( '..','ttfquery','__init__.py')):
         if line.strip().startswith( '__version__' ):
-            return eval(line.strip().split('=')[1].strip())
+            return ast.literal_eval(line.strip().split('=')[1].strip())
     raise RuntimeError( """No __version__ = 'string' in __init__.py""" )
 release = find_version()
 version = ".".join( release.split('.')[:2])

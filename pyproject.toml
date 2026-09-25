@@ -80,12 +80,17 @@ select = ["OGC131", "OGC141", "OGC201", "OGC221"]
 [tool.ruff.lint]
 select = [
     "E", "W", "F", "B", "PGH003", "PGH004", "PLE0604", "PLE0605",
-    # A noqa that silences nothing, and an exception swallowed with no trace.
-    "RUF100", "S110", "E722", "TRY400",
+    # A noqa that silences nothing, and an exception swallowed with no trace
+    # or caught wider than what can be raised.
+    "RUF100", "S110", "S112", "E722", "TRY400", "BLE001",
     # Parameters nothing reads, and datetimes with no time zone.
     "ARG", "DTZ",
-    # exec, tar extraction without a filter, and URL opening of any scheme.
-    "S102", "S202", "S310",
+    # A mutable class attribute, an import inside a function, and a private
+    # name reached from another module.
+    "RUF012", "PLC0415", "SLF001",
+    # exec, eval, unpickling, tar extraction without a filter, and URL
+    # opening of any scheme.
+    "S102", "S307", "S301", "S202", "S310",
     # `X | Y` for unions where the floor allows it, and the builtin generics
     # (`dict[str, int]`) rather than their `typing` aliases.
     "UP007", "UP006", "UP035",

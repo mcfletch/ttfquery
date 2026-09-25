@@ -10,7 +10,7 @@ class TestGlyphQuery(unittest.TestCase):
         self.workdir = tempfile.mkdtemp(prefix='ttfquery-',suffix='-tests')
         self.registry = os.path.join(self.workdir,'fonts.cache')
         class fakeoptions:
-            directories = []
+            directories = ()
             registry = self.registry
         self.options = fakeoptions
         self.registry = ttffiles.registry_for_options(self.options)

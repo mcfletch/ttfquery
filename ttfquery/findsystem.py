@@ -10,7 +10,7 @@ unicode = str
 def win32FontDirectory( ):
     """Get User-specific font directory on Win32"""
     try:
-        import winreg
+        import winreg  # noqa: PLC0415 a Windows-only module
     except ImportError:
         return os.path.join(os.environ['WINDIR'], 'Fonts')
     else:
@@ -31,7 +31,7 @@ def win32InstalledFonts( fontDirectory = None ):
     likely due to a too-new windows install, then we'll
     just return all .ttf files in fontDirectory
     """
-    import winreg
+    import winreg  # noqa: PLC0415 a Windows-only module
     if fontDirectory is None:
         fontDirectory = win32FontDirectory()
     k = None
