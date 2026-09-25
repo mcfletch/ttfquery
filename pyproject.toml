@@ -71,6 +71,12 @@ cache-keys = [{ file = "pyproject.toml" }, { file = "ttfquery/__init__.py" }]
 # Named explicitly rather than left to ruff's default, which has widened
 # between releases: a gate whose meaning moves when a tool is upgraded is not a
 # gate. `E,W,F,B` is what the other pre-2010 projects here hold to.
+[tool.openglcontext-checks]
+# The OGC rules (openglcontext-checks) this project is clean of, held by
+# the workspace preflight. The others join as the project reaches zero of
+# each; the counts are in openglcontext/plans/DEFECT-PREVENTION.md.
+select = ["OGC131", "OGC141", "OGC201", "OGC221"]
+
 [tool.ruff.lint]
 select = ["E", "W", "F", "B", "PGH003", "PGH004", "PLE0604", "PLE0605"]
 # `_name` as well as `_`: an underscore prefix is how Python says a name is
