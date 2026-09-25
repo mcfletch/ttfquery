@@ -102,3 +102,27 @@ class TestAByteName:
     def test_latin_1(self):
         with pytest.raises(KeyError, match='Café'):
             ttffiles.Registry().matchName('Café'.encode('latin-1'))
+
+
+class TestSavingTheRegistry:
+    """`save` replaces its file whole: a save that fails leaves the last one."""
+
+    def test_a_save_that_fails_leaves_the_registry_that_was_saved(self, tmp_path, monkeypatch):
+        cache = tmp_path / 'fonts.cache'
+        ttffiles.Registry().save(str(cache), force=1)
+        saved = cache.read_bytes()
+
+        def refuse(_table, handle, _protocol):
+            handle.write(b'half a registr')
+            raise OSError('the disk is full')
+
+        monkeypatch.setattr(ttffiles.pickle, 'dump', refuse)
+        with pytest.raises(OSError, match='disk is full'):
+            ttffiles.Registry().save(str(cache), force=1)
+        assert cache.read_bytes() == saved
+        assert [entry.name for entry in tmp_path.iterdir()] == ['fonts.cache']
+
+    def test_a_save_to_an_open_handle_writes_to_it(self, tmp_path):
+        with open(tmp_path / 'fonts.cache', 'wb') as handle:
+            assert ttffiles.Registry().save(handle, force=1) == 0
+        assert ttffiles.Registry().load(str(tmp_path / 'fonts.cache')) == 0

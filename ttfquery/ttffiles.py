@@ -289,7 +289,9 @@ class Registry(object):
     def save( self, file=None, force=0 ):
         """Attempt to save the font metadata to a pickled file
 
-        file -- a file open in binary write mode or a filename
+        file -- a file open in binary write mode or a filename; a
+        file named is replaced whole, so a save that fails leaves
+        the one before
         force -- if not true and DIRTY false, then don't actually
         save anything
 
@@ -300,9 +302,20 @@ class Registry(object):
         file = file or self.filename
         if not file:
             raise TypeError( """Attempted to save %r to default file, no default file specified"""% (self,))
-        if not hasattr( file, 'write'):
-            file = open( file, 'wb' )
-        pickle.dump( list(self.specificFonts.values()), file, 1 )
+        table = list(self.specificFonts.values())
+        if hasattr( file, 'write'):
+            pickle.dump( table, file, 1 )
+        else:
+            # Written beside the cache and renamed over it: a save that fails
+            # leaves the cache `load` last read.
+            partial = file + '.partial'
+            try:
+                with open( partial, 'wb' ) as handle:
+                    pickle.dump( table, handle, 1 )
+                os.replace( partial, file )
+            finally:
+                if os.path.exists( partial ):
+                    os.unlink( partial )
         self.dirty(0)
         return len(self.specificFonts)
     def load( self, file, clearFirst=1 ):
