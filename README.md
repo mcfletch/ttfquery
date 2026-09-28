@@ -9,7 +9,8 @@ TTFQuery builds on the FontTools package to allow the Python programmer to accom
     * abstract family type
     * proper font name
     * glyph outlines
-* build simple metadata registries for run-time font matching
+* build simple metadata registries for run-time font matching, holding the
+  fonts text can be laid out with and reporting the files that cannot
 
 With these functionalities, it is possible to readily create OpenGL solid-text
 rendering libraries which can accept abstract font-family names as font

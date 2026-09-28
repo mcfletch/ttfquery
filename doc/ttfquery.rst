@@ -17,6 +17,14 @@ ttfquery Package
     :undoc-members:
     :show-inheritance:
 
+:mod:`errors` Module
+--------------------
+
+.. automodule:: ttfquery.errors
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 :mod:`describe` Module
 ----------------------
 

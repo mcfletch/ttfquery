@@ -51,8 +51,21 @@ appropriate glyphs for rendering a given character:
 
 .. note::
 
-  :func:`glyphquery.glyphName` will actually report a placeholder when the 
+  :func:`glyphquery.glyphName` will actually report a placeholder when the
   font has no glyph for the character, so you'll get an empty box in most fonts.
+
+A character is looked up by its Unicode code point, so the sub-table of the
+font's ``cmap`` that answers about it is a Unicode one:
+:func:`ttfquery.describe.guessEncoding` takes the most capable the font carries,
+in the order of :data:`ttfquery.describe.UNICODE_ENCODINGS`, which is how a
+character outside the Basic Multilingual Plane reaches the glyph a font holds for
+it. A font carrying no Unicode sub-table answers from the one it has -- a symbol
+font keeps its glyphs at code points of its own. Every call taking a character
+takes an ``encoding`` as well, for a caller naming the sub-table itself:
+
+.. doctest::
+
+  >>> glyphquery.glyphName(font, 'a', (1, 0))    # the Mac-Roman sub-table
 
 The final step is to ask the :mod:`ttfquery.glyph` module to render the glyph 
 name into a series of outlines/contours that we can pass to our rendering
@@ -66,6 +79,44 @@ engine:
   >>> print(shape.contours)
   >>> print(shape.outlines)
 
+:attr:`shape.width <ttfquery.glyph.Glyph.width>` is the advance width the font
+holds for the glyph, in font units: how far the pen moves before the next glyph
+is drawn. It is 0 for a glyph that draws over the one before it, which is what a
+combining mark does, and for every glyph in a font whose metrics were built
+wrong.
+
+Fonts a Registry Leaves Out
+---------------------------
+
+A font directory holds whatever has been installed in it, so
+:meth:`ttfquery.ttffiles.Registry.scan` registers the fonts that text can be laid
+out with and reports the rest. It returns the files it registered and the files
+it did not, and logs each rejection with the reason:
+
+.. doctest::
+
+  >>> from ttfquery import ttffiles
+  >>> registry = ttffiles.Registry()
+  >>> registered, rejected = registry.scan(['/usr/share/fonts'])
+
+:func:`ttfquery.glyphquery.unusable` is the check it applies, and answers the
+reasons a font cannot be used:
+
+ * a table it has not got, of ``cmap``, ``glyf``, ``loca``, ``hmtx``, ``hhea``,
+   ``head``, ``name`` and ``OS/2``. A CFF/OpenType font has no ``glyf`` table,
+   and the outlines read here are TrueType outlines.
+ * an ``OS/2`` table too short to carry the typographic metrics, or one whose
+   ascender and descender leave its characters no height
+ * an em square of 0 units, which nothing can be scaled by
+ * letters and digits that mostly carry an advance width of 0, which draws a
+   whole line of text in one place
+
+A rejected font still opens: :func:`ttfquery.describe.openFont` reads whatever
+fontTools reads, and the queries report what the file holds. Where a query cannot
+answer -- a table the font has not got, an outline whose points contradict the
+format -- it raises :class:`ttfquery.errors.FontError`, which is a ``ValueError``,
+so a caller walking a machine's fonts can catch one file and carry on to the
+next.
 
 Installation
 ------------

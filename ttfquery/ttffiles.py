@@ -1,5 +1,6 @@
 """Registry of available TrueType font files"""
-from ttfquery import describe, findsystem
+from ttfquery import describe, findsystem, glyphquery
+from ttfquery.errors import UnusableFont
 import argparse
 import os
 import pickle
@@ -108,15 +109,14 @@ class Registry(object):
         if filename in self.files and not force:
             return self.specificFonts.get( self.files[filename] )
         font = describe.openFont(filename)
-        if 'glyf' not in font:
-            # CFF / OpenType-CFF fonts have no 'glyf' table; ttfquery's glyph
-            # outline extraction is TrueType-only, so exclude them rather than
-            # crash later when their outlines are requested.
-            raise ValueError(
-                "Unsupported font (no 'glyf' table, likely CFF/OpenType): %s" % (
-                    filename,
-                )
-            )
+        reasons = glyphquery.unusable( font )
+        if reasons:
+            # A registered font is one a caller can lay text out with, so a
+            # font that has no layout in it is kept out of the registry rather
+            # than left to fail whenever its glyphs are asked for.  A CFF /
+            # OpenType-CFF font is one of these: it has no 'glyf' table, and
+            # the outline extraction here is TrueType-only.
+            raise UnusableFont( reasons, filename )
         try:
             modifiers = describe.modifiers( font )
         except (KeyError,AttributeError):
@@ -343,14 +343,20 @@ class Registry(object):
         """Scan the given paths registering each found font
 
         Returns ``(new, failed)``, the file names registered and the file
-        names that could not be read. Each failure is logged: at INFO with
-        the error's message, or with ``printErrors`` at WARNING with its
-        traceback.
+        names that could not be registered. A file is in ``failed`` whether it
+        could not be read at all or holds no text layout to register. Each
+        failure is logged: at INFO with the reason, or with ``printErrors`` at
+        WARNING with its traceback.
         """
         new, failed = [],[]
         for filename in findsystem.findFonts(paths):
             try:
                 self.register( filename, force = force )
+            except UnusableFont as err:
+                # A font with no layout in it was read successfully; the reasons
+                # say what it has instead, so there is no traceback to show.
+                log.info( 'Not registering %s, which %s', filename, '; '.join(err.reasons) )
+                failed.append( filename )
             except Exception as err:
                 # A malformed font raises whatever fontTools meets first, and
                 # the file is reported in `failed` whichever it is.

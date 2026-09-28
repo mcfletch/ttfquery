@@ -1,8 +1,9 @@
 """Extract meta-data from a font-file to describe the font"""
 import logging
-import sys
 
 from fontTools import ttLib
+
+from ttfquery.errors import FontError
 
 unicode = str
 long = int
@@ -10,10 +11,30 @@ log = logging.getLogger(__name__)
 
 
 def openFont(filename):
-    """Get a new font object"""
+    """Get a new font object
+
+    filename -- the path to a font file, or an open binary file
+
+    A file that is not a font raises :class:`ttfquery.errors.FontError`, so that
+    a caller working through a directory of files can tell one it cannot use
+    from a fault of its own. A path that cannot be opened raises the `OSError`
+    of opening it, which is about the path rather than about any font.
+
+    The font is read as fontTools reads one, a table at a time as they are
+    asked for, so damage further into the file is found by the query that reads
+    that part. :func:`ttfquery.glyphquery.unusable` reads the tables a query
+    needs and reports such a font rather than raising.
+    """
     if isinstance(filename, (bytes, unicode)):
         filename = open(filename, "rb")
-    return ttLib.TTFont(filename)
+    try:
+        return ttLib.TTFont(filename)
+    except ttLib.TTLibError as err:
+        raise FontError(
+            """%s is not a font file that can be read: %s"""% (
+                getattr(filename, 'name', 'The font'), err,
+            )
+        ) from err
 
 
 FONT_SPECIFIER_NAME_ID = 4
@@ -264,27 +285,43 @@ def modifiers(font):
     )
 
 
+#: The cmap sub-tables whose code points are Unicode code points, the most
+#: capable first. Platform 0 is Unicode throughout, where encodings 4 and 6
+#: carry the whole repertoire and 0 to 3 stop at the Basic Multilingual Plane;
+#: on platform 3, Windows, encoding 10 carries the whole repertoire and 1 the
+#: BMP. Anything else -- a Macintosh script code, or the symbol encoding (3, 0)
+#: -- numbers its characters its own way.
+UNICODE_ENCODINGS = (
+    (3, 10),
+    (0, 6),
+    (0, 4),
+    (3, 1),
+    (0, 3),
+    (0, 2),
+    (0, 1),
+    (0, 0),
+)
+
+
 def guessEncoding(font, given=None):
-    """Attempt to guess/retrieve an encoding from the font itself
+    """The cmap sub-table to look characters up in, as (platformID, platEncID)
 
-    Basically this will try to get the given encoding
-    (unless it is None).
+    given -- which sub-table to use, where the caller knows:
 
-    If given is a single integer or a single-item tuple,
-    we will attempt scan looking for any table matching
-    given as the platform ID and returning the first sub
-    table.
+        a two-tuple  that sub-table, and a ValueError where the font has not
+                     got it
+        an integer   the font's first sub-table of that platform, and a
+                     ValueError where it has none
+        None         the font's most capable Unicode sub-table, in the order of
+                     `UNICODE_ENCODINGS`.  A font with none of them answers
+                     with the first sub-table it has, which is the whole of
+                     what it offers -- a symbol font keeps its glyphs at code
+                     points of its own.
 
-    If given is a two-value tuple, we will require
-    explicit matching, and raise errors if the encoding
-    cannot be retrieved.
-
-    if given is None, we will return the first encoding
-    in the font.
-
-    XXX This needs some work, particularly for non-win32
-        platforms, where there is no preference embodied
-        for the native encoding.
+    A character reaches the sub-table as `ord(char)`, which is a Unicode code
+    point, so a Unicode sub-table is the one that answers about the character
+    asked for: any other numbers its characters its own way, and answers with
+    whichever glyph it happens to keep at that number.
     """
     if isinstance(given, tuple) and given:
         if len(given) == 2:
@@ -322,15 +359,19 @@ def guessEncoding(font, given=None):
                 [(table.platformID, table.platEncID) for table in font["cmap"].tables],
             )
         )
-    if sys.platform == "win32":
-        prefered = (3, 1)
-        # should have prefered values for Linux and Mac as well...
-        for table in font["cmap"].tables:
-            if (table.platformID, table.platEncID) == prefered:
-                return prefered
-    # just retrieve the first table's values
-    for table in font["cmap"].tables:
-        return (table.platformID, table.platEncID)
+    available = [
+        (table.platformID, table.platEncID) for table in font["cmap"].tables
+    ]
+    for encoding in UNICODE_ENCODINGS:
+        if encoding in available:
+            return encoding
+    if available:
+        log.debug(
+            "%r has no Unicode cmap sub-table, reading characters from its %r "
+            "sub-table. Available: %s",
+            shortName(font), available[0], available,
+        )
+        return available[0]
     raise ValueError(
         """There are no encoding tables within the font %r, likely a corrupt font-file"""
         % (shortName(font),)
