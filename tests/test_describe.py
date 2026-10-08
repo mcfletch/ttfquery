@@ -26,12 +26,16 @@ class TestDescribe(unittest.TestCase):
                 assert describe.weightName(modifiers[0])
 
 
-def a_named_font(name, family):
-    """A stand-in font whose name table holds `name` and `family` records."""
+def a_named_font(name, family, typographic=None):
+    """A stand-in font whose name table holds `name` and `family` records,
+    and a typographic family record where `typographic` is given."""
     records = [
         SimpleNamespace(nameID=describe.FONT_SPECIFIER_NAME_ID, string=name),
         SimpleNamespace(nameID=describe.FONT_SPECIFIER_FAMILY_ID, string=family),
     ]
+    if typographic is not None:
+        records.append(SimpleNamespace(
+            nameID=describe.FONT_TYPOGRAPHIC_FAMILY_ID, string=typographic))
     return {'name': SimpleNamespace(names=records)}
 
 
@@ -175,3 +179,13 @@ class TestTheEncodingIsAUnicodeOne:
             assert 'no encoding tables' in str(err), err
         else:
             raise AssertionError('a font with no cmap sub-table was accepted')
+class TestTheFamily:
+    """`shortName`'s family is the typographic family where the font names one"""
+
+    def test_a_weight_outside_the_four_styles_joins_its_family(self):
+        font = a_named_font('Open Sans Light', 'Open Sans Light', 'Open Sans')
+        assert describe.shortName(font) == ('Open Sans Light', 'Open Sans')
+
+    def test_without_one_it_is_the_legacy_family(self):
+        font = a_named_font('Open Sans Bold', 'Open Sans')
+        assert describe.shortName(font) == ('Open Sans Bold', 'Open Sans')

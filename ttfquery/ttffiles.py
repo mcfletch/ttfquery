@@ -10,6 +10,10 @@ from collections import namedtuple
 unicode = str
 log = logging.getLogger( __name__ )
 
+#: The format `Registry.save` writes. A cache in another format, which may
+#: group the fonts differently, is not loaded.
+CACHE_FORMAT = 2
+
 class FontMetadata(namedtuple(
     'FontMetadata',
     (
@@ -302,7 +306,7 @@ class Registry(object):
         file = file or self.filename
         if not file:
             raise TypeError( """Attempted to save %r to default file, no default file specified"""% (self,))
-        table = list(self.specificFonts.values())
+        table = (CACHE_FORMAT, list(self.specificFonts.values()))
         if hasattr( file, 'write'):
             pickle.dump( table, file, 1 )
         else:
@@ -324,13 +328,20 @@ class Registry(object):
         file -- a file open in binary read mode or a filename
         clearFirst -- if true, clear tables first, and reset DIRTY
         to 0 after finished
+
+        returns the number of records in the file; a file in a format other
+        than CACHE_FORMAT registers nothing and returns 0
         """
         if clearFirst:
             self.clear()
         if not hasattr( file, 'read'):
             self.filename = file
             file = open( file, 'rb' )
-        table = pickle.load( file )  # noqa: S301 the registry's own cache, written by `save`
+        saved = pickle.load( file )  # noqa: S301 the registry's own cache, written by `save`
+        if not (isinstance( saved, tuple ) and len( saved ) == 2 and saved[0] == CACHE_FORMAT):
+            log.info( 'Font cache %r is of another format, not loaded', getattr( file, 'name', file ) )
+            return 0
+        table = saved[1]
         for filename, modifiers, specificName, fontName, familySpecifier in table:
             ## Minimal sanity check...
             if os.path.isfile( filename ):

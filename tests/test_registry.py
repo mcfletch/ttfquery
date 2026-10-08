@@ -1,5 +1,5 @@
 from __future__ import print_function
-from ttfquery import ttffiles, ttfgroups, ttfmetadata, ttffamily
+from ttfquery import scriptregistry, ttffiles, ttfgroups, ttfmetadata, ttffamily
 import os
 import unittest
 import tempfile
@@ -126,3 +126,43 @@ class TestSavingTheRegistry:
         with open(tmp_path / 'fonts.cache', 'wb') as handle:
             assert ttffiles.Registry().save(handle, force=1) == 0
         assert ttffiles.Registry().load(str(tmp_path / 'fonts.cache')) == 0
+
+
+class TestLoadingACache:
+    """`load` reads a cache `save` wrote in this format, and no other"""
+
+    def test_a_saved_registry_loads_back(self, tmp_path):
+        registry = ttffiles.Registry()
+        registry.scan()
+        if not registry.specificFonts:
+            pytest.skip('no readable font on this machine')
+        registry.save(str(tmp_path / 'fonts.cache'), force=1)
+        loaded = ttffiles.Registry()
+        assert loaded.load(str(tmp_path / 'fonts.cache')) == len(registry.specificFonts)
+        assert loaded.fonts == registry.fonts
+
+    def test_a_cache_of_another_format_loads_nothing(self, tmp_path):
+        registry = ttffiles.Registry()
+        registry.scan()
+        if not registry.specificFonts:
+            pytest.skip('no readable font on this machine')
+        with open(tmp_path / 'fonts.cache', 'wb') as handle:
+            ttffiles.pickle.dump(list(registry.specificFonts.values()), handle, 1)
+        loaded = ttffiles.Registry()
+        assert loaded.load(str(tmp_path / 'fonts.cache')) == 0
+        assert not loaded.fonts
+
+
+def test_the_script_registry_scans_again_over_a_cache_of_another_format(tmp_path, monkeypatch):
+    cache = tmp_path / 'font.cache'
+    with open(cache, 'wb') as handle:
+        ttffiles.pickle.dump([], handle, 1)
+    monkeypatch.setattr(scriptregistry, 'registryFile', str(cache))
+    monkeypatch.setattr(scriptregistry, 'registry', None)
+    scanned = ttffiles.Registry()
+    scanned.scan()
+    if not scanned.specificFonts:
+        pytest.skip('no readable font on this machine')
+    registry = scriptregistry.get_registry()
+    assert registry.fonts == scanned.fonts
+    assert ttffiles.Registry().load(str(cache)) == len(scanned.specificFonts)

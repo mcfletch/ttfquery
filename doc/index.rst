@@ -25,6 +25,13 @@ for fonts by name. This registry/cache is an instance of :class:`ttfquery.ttffil
 and it is mostly useful in that it provides fast access to the font metadata
 if you are going to be accessing it many times.
 
+A font's family is its typographic family where the font names one (name
+ID 16), else its family name (name ID 1), so a family's light, semibold and
+extra-bold faces are listed under the same name as its regular and bold
+ones. A cache file records the format it was written in; one in another
+format loads no fonts, and :func:`ttfquery.scriptregistry.get_registry`
+scans the system's fonts again and rewrites it.
+
 For instance, if you wanted to use the `Ubuntu` font on your platform, you would 
 do something like this:
 

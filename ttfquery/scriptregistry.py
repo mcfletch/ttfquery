@@ -23,13 +23,14 @@ else:
 
 registry = None
 def get_registry():
-    """Get a singleton registry instance in `registryFile` scanning if new"""
+    """Get a singleton registry instance in `registryFile`, scanning where
+    the file is missing or holds no fonts in the current format"""
     global registry
     if registry is not None:
         return registry
     if os.path.isfile( registryFile ):
         registry = ttffiles.load( registryFile )
-    else:
+    if registry is None or not registry.fonts:
         registry = ttffiles.Registry()
         log.info( """Scanning for system fonts...""" )
         new,failed = registry.scan( printErrors = 1, force = 0)

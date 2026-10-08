@@ -39,6 +39,10 @@ def openFont(filename):
 
 FONT_SPECIFIER_NAME_ID = 4
 FONT_SPECIFIER_FAMILY_ID = 1
+#: The typographic family: what a font of a weight or width outside regular,
+#: italic, bold and bold italic names its family, where the family name
+#: (FONT_SPECIFIER_FAMILY_ID) holds the weight as well.
+FONT_TYPOGRAPHIC_FAMILY_ID = 16
 
 
 def _recordText(value):
@@ -58,19 +62,21 @@ def _recordText(value):
 def shortName(font):
     """The font's own name and its family's, as text
 
-    ``('Open Sans Bold Italic', 'Open Sans')`` -- what the font calls itself,
-    and the family it belongs to.
+    ``('Open Sans Light', 'Open Sans')`` -- what the font calls itself, and
+    the family it belongs to: the typographic family where the font names
+    one, else its family name.
     """
     name = ""
     family = ""
+    typographic = ""
     for record in font["name"].names:
         if record.nameID == FONT_SPECIFIER_NAME_ID and not name:
             name = _recordText(record.string)
         elif record.nameID == FONT_SPECIFIER_FAMILY_ID and not family:
             family = _recordText(record.string)
-        if name and family:
-            break
-    return name, family
+        elif record.nameID == FONT_TYPOGRAPHIC_FAMILY_ID and not typographic:
+            typographic = _recordText(record.string)
+    return name, typographic or family
 
 
 FAMILY_NAMES = {
